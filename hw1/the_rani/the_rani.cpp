@@ -199,14 +199,18 @@ void TheRani::move(int x,int y, int n, int m) {
         }   //copying like this removes subjects that 
             //are transferred to other experiment
     
-        int inc = n; //variable to only copy things user wants to move from prev experiment
+        int inc = n; //variable to only copy things user 
+                    //wants to move from prev experiment
         
-        for (int i = copyCount[y] - dif; i < copyCount[y]; i++) { //copies values to end of//
-                                                                  //destination experiment//
+        for (int i = copyCount[y] - dif; i < copyCount[y]; i++) { 
+            //copies values to end of//
+            //destination experiment//
+
             tArray[y][i] = subject_history[x][inc];
             if (y != 0) {
-                ss << tArray[y][i] << " " << y; //writes new experiment into subject history
-                tArray[y][i] = ss.str();        //if experiment is not the subj pool
+                ss << tArray[y][i] << " " << y; //writes new experiment 
+                tArray[y][i] = ss.str();        //into subject history
+                                                //if experiment != 0
                 ss.str(""); //cleanses stringstream
             
             }
