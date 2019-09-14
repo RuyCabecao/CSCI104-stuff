@@ -18,14 +18,14 @@ public:
 
 
 private:
-    int experiment_count;       // You will need to track the number of experiments
-    int* subject_counts;        // For each, the number of subjects
+    int experiment_count = 0;       // You will need to track the number of experiments
+    int* subject_counts = 0;        // For each, the number of subjects
     string** subject_history = NULL;   // And for each subject, their history
 
     ifstream input;             // Input file stream
     ofstream output;            // Output file stream
 
-    int totalSubj;
+    int totalSubj = 0;
 
     // Called in the main method
     void execute(const string& line);
@@ -40,9 +40,9 @@ private:
 
     void delater();
 
-    int starter;
+    int starter = 0;
 
-    int lNum;
+    int lNum = 0;
 
     // Possible helper: deallocate all current members
 };
