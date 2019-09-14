@@ -18,9 +18,9 @@ public:
 
 
 private:
-    int experiment_count = 0;       // You will need to track the number of experiments
-    int* subject_counts = 0;        // For each, the number of subjects
-    string** subject_history = NULL;   // And for each subject, their history
+    int experiment_count = 0;       
+    int* subject_counts = 0;       
+    string** subject_history = NULL;   
 
     ifstream input;             // Input file stream
     ofstream output;            // Output file stream
