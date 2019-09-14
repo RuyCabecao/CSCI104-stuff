@@ -228,7 +228,7 @@ void TheRani::move(int x,int y, int n, int m) {
         }
 
         for (int i = 0; i<n; i++){
-            tArray[x][i] = subject_history[x][i]; //values before n stay the same
+            tArray[x][i] = subject_history[x][i]; //before n stay the same
         }    
 
         for (int i = subject_counts[x]-1; i > m ; i--) {//moves values after
@@ -238,8 +238,7 @@ void TheRani::move(int x,int y, int n, int m) {
         for (int i = subject_counts[x] - dif; i < subject_counts[x]; i++) {
             tArray[x][i] = subject_history[x][i];
             if (y != 0) {
-                ss << tArray[x][i] << " " << y; //writes new experiment into subject history
-                tArray[y][i] = ss.str();        // //if experiment is not the subj pool
+                ss << tArray[x][i] << " " << y; 
                 ss.str("");
             }
         }
@@ -247,8 +246,8 @@ void TheRani::move(int x,int y, int n, int m) {
         for (int i = 0; i < experiment_count; i++) {
             if (i != x) {
                 for (int j = 0; j < subject_counts[i]; j++) {
-                    tArray[i][j] = subject_history[i][j]; //copies rest of previous array     
-                }
+                    tArray[i][j] = subject_history[i][j]; //copies rest of      
+                }                                         //previous array
             }
         }
     }
@@ -286,11 +285,13 @@ void TheRani::main() {
 void TheRani::execute(const string& line) {
     string command;
     stringstream stream(line);  // Initialize the stream with the line
-    stream >> command;          // Read the first word, which is the command
+    stream >> command;          // Read the first word, 
+                                //which is the command
 
     if (starter == 0 && command != "START") {
         output <<"Error on line" << lNum << ": no subjects yet" << endl;
-        return; //error check in case user tries any command before START
+        return; //error check in case user tries any 
+                //command before START
     }
 
 
@@ -318,10 +319,9 @@ void TheRani::execute(const string& line) {
                     if (errtest[j] != 0) {
                         output << "Error on line "<< lNum 
                         << ": expected integer argument" << endl;
-                        return; //check if input is a float that can be interpreted as an int
-                    }           //that can be interpreted as an int i.e. 3.0000
-
-                }
+                        return; //check if input is a float
+                    }           //that can be interpreted 
+                }               //as an int i.e. 3.0000
 
             }
 
@@ -344,14 +344,17 @@ void TheRani::execute(const string& line) {
         stream >> m1;
 
         if (stream.fail()) {
-            output << "Error on line " << lNum << ": too few arguments" << endl; 
+            output << "Error on line " << lNum << 
+            ": too few arguments" << endl; 
             return;
         }
 
-        if (x1 > experiment_count || x1 < 0 || y1 > experiment_count || y1 < 0 || 
-        m1 > subject_counts[x1] || m1 < 0 || n1 > subject_counts[x1] || n1 < 0) 
+        if (x1 > experiment_count || x1 < 0 || y1 > experiment_count 
+        || y1 < 0 ||  m1 > subject_counts[x1] || m1 < 0 
+        || n1 > subject_counts[x1] || n1 < 0) 
         {
-            output << "Error on line " << lNum << ": argument out of range" << endl;
+            output << "Error on line " << lNum << 
+            ": argument out of range" << endl;
             return; //checks for all possible incorrect inputs
         }
 
@@ -397,14 +400,16 @@ void TheRani::execute(const string& line) {
         stream >> n2;
 
         if (stream.fail()) {
-            output << "Error on line " << lNum << ": too few arguments" << endl; 
+            output << "Error on line " << lNum << 
+            ": too few arguments" << endl; 
             return; //checks if argument # is correct
         }
 
         string errtest2;
         stream >> errtest2; //same checking as MOVE and START
         for (unsigned int i = 0; i < errtest2.size(); i++) {
-            if (isdigit(errtest2[i]) == false || errtest2[i] != '.') {
+            if (isdigit(errtest2[i]) == false || 
+            errtest2[i] != '.') {
                 output << "Error on line "<< lNum 
                 << ": expected integer argument" << endl;
                 return;
@@ -412,7 +417,7 @@ void TheRani::execute(const string& line) {
             }
 
             if (errtest2[i] == '.') {
-                for (unsigned int j = i+1; j < errtest2.size(); j++) {
+                for (unsigned int j = i+1; j<errtest2.size(); j++) {
                     if (errtest2[j] != 0) {
                         output << "Error on line "<< lNum 
                         << ": expected integer argument" << endl;
