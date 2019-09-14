@@ -6,3 +6,4 @@
 	- Use of namespace std
 	- Some comments are broken into two lines for the sake of < 80 chars
 	- Problems with compiling using -Wall and -std=c++11
+	- Had to use unsigned ints in error check loops because of compiler warnings

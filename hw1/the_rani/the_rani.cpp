@@ -189,9 +189,6 @@ void TheRani::move(int x,int y, int n, int m) {
 
 
     
-        
-
-        ///////// MOVING INSIDE X \\\\\\\\\
 
         for (int i = 0; i<n; i++){
             tArray[x][i] = subject_history[x][i]; //copies first values
@@ -199,11 +196,9 @@ void TheRani::move(int x,int y, int n, int m) {
 
         for (int i = m+1; i < subject_counts[x] ; i++) {//copies last values
             tArray[x][i-dif] = subject_history[x][i];
-        }   //copying like this removes subjects that are transferred to other experiment
-
-
+        }   //copying like this removes subjects that 
+            //are transferred to other experiment
     
-        /*//////// MOVING INSIDE Y \\\\\\\\*/
         int inc = n; //variable to only copy things user wants to move from prev experiment
         
         for (int i = copyCount[y] - dif; i < copyCount[y]; i++) { //copies values to end of//
@@ -304,16 +299,18 @@ void TheRani::execute(const string& line) {
 
         string errtest;
         stream >> errtest; //take line as string (array of chars)
-        for (int i = 0; i < errtest.size(); i++) {
+        for (unsigned int i = 0; i < errtest.size(); i++) {
             if (isdigit(errtest[i]) == false || errtest[i] != '.') {
                 output << "Error on line "<< lNum 
                 << ": expected integer argument" << endl;
                 return; //check every char for not ints
-
+                        
+                    //had to use unsigned int in loop
+                    //because compiler was giving errors
             }
 
             if (errtest[i] == '.') {
-                for (int j = i+1; j < errtest.size(); j++) {
+                for (unsigned int j = i+1; j < errtest.size(); j++) {
                     if (errtest[j] != 0) {
                         output << "Error on line "<< lNum 
                         << ": expected integer argument" << endl;
@@ -362,7 +359,7 @@ void TheRani::execute(const string& line) {
 
         string errtest1;
         stream >> errtest1; //same error checking as in START
-        for (int i = 0; i < errtest1.size(); i++) {
+        for (unsigned int i = 0; i < errtest1.size(); i++) {
             if (isdigit(errtest1[i]) == false || errtest1[i] != '.') {
                 output << "Error on line "<< lNum 
                 << ": expected integer argument" << endl;
@@ -370,7 +367,7 @@ void TheRani::execute(const string& line) {
             }
 
             if (errtest1[i] == '.') {
-                for (int j = i+1; j < errtest1.size(); j++) {
+                for (unsigned int j = i+1; j < errtest1.size(); j++) {
                     if (errtest1[j] != 0) {
                         output << "Error on line "<< lNum 
                         << ": expected integer argument" << endl;
@@ -402,7 +399,7 @@ void TheRani::execute(const string& line) {
 
         string errtest2;
         stream >> errtest2; //same checking as MOVE and START
-        for (int i = 0; i < errtest2.size(); i++) {
+        for (unsigned int i = 0; i < errtest2.size(); i++) {
             if (isdigit(errtest2[i]) == false || errtest2[i] != '.') {
                 output << "Error on line "<< lNum 
                 << ": expected integer argument" << endl;
@@ -411,7 +408,7 @@ void TheRani::execute(const string& line) {
             }
 
             if (errtest2[i] == '.') {
-                for (int j = i+1; j < errtest2.size(); j++) {
+                for (unsigned int j = i+1; j < errtest2.size(); j++) {
                     if (errtest2[j] != 0) {
                         output << "Error on line "<< lNum 
                         << ": expected integer argument" << endl;
