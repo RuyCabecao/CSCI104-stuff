@@ -219,7 +219,7 @@ void TheRani::move(int x,int y, int n, int m) {
     
     }
 
-    else if (y == x && subject_counts[x] != 0) { //subjects moving to same experiment case
+    else if (y == x && subject_counts[x] != 0) { //moving to same exp
         for (int i = 0; i < experiment_count; i++) {
             tArray[i] = new string[subject_counts[i]];
             for (int j = 0; j < subject_counts[i]; j++){
