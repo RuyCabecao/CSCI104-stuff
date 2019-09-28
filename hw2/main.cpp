@@ -1,6 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include "interpreter/interpreter.h"
+#include "interpreter/command.h"
+#include "interpreter/boolean.h"
+#include "interpreter/arithmetic.h"
 
 using namespace std;
 
