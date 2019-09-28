@@ -54,13 +54,12 @@ private:
 
 class LetVarArray : public Command {
 public:
-    LetVarArray(NumericExpression* var, NumericExpression* ind, NumericExpression* NExp, LineNum line);
+    LetVarArray(NumericExpression* vararr, NumericExpression* NExp, LineNum line);
     ~LetVarArray();
     std::string format() const;
 
 private:
-    NumericExpression* var;
-    NumericExpression* ind;
+    NumericExpression* vararr;
     NumericExpression* NExp;
     LineNum line;
 

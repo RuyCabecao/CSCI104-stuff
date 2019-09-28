@@ -21,7 +21,7 @@ string Print::format() const{
 
 //////////////////////////////////////////
 
-LetVar::LetVar(NumericExpression* var, NumericExpression* NExp, LineNum line) : var(var), line(line) {
+LetVar::LetVar(NumericExpression* var, NumericExpression* NExp, LineNum line) : var(var), NExp(NExp) , line(line) {
 
 
 }
@@ -37,31 +37,28 @@ LetVar::~LetVar() {
 }
 
 string LetVar::format() const{
-    return this->line.format() + " LET " + this->var->format() + this->NExp->format();
+    return this->line.format() + " LET " + this->var->format() + " " + this->NExp->format();
 
 }
 
 //////////////////////////////////////////
 
-LetVarArray::LetVarArray(NumericExpression* var, NumericExpression* ind, NumericExpression* NExp, LineNum line) : var(var), ind(ind), NExp(NExp), line(line) {
+LetVarArray::LetVarArray(NumericExpression* vararr, NumericExpression* NExp, LineNum line) : vararr(vararr), NExp(NExp), line(line) {
 
 
 }
 
 LetVarArray::~LetVarArray() {
-    if (var) {
-        delete this->var;
+    if (vararr) {
+        delete this->vararr;
     }
     if (NExp) {
         delete this->NExp;
     }
-    if (ind) {
-        delete this->ind;
-    }
 }
 
 string LetVarArray::format() const{
-    return this->line.format() + " LET " + this->var->format() + "[" + this->ind->format() + "] " + this->NExp->format();
+    return this->line.format() + " LET " + this->vararr->format() + " " + this->NExp->format();
 
 }
 

@@ -16,7 +16,7 @@ Greater::~Greater() {
 }
 
 string Greater::format() const {
-    return "(" + this->right->format() + " < " + this->left->format() + ")";
+    return this->right->format() + " < " + this->left->format();
 }
 
 Less::Less(NumericExpression* left, NumericExpression* right) : left(left), right(right) {
@@ -33,7 +33,7 @@ Less::~Less() {
 }
 
 string Less::format() const {
-    return "(" + this->left->format() + " < " + this->right->format() + ")";
+    return this->left->format() + " < " + this->right->format();
 }
 
 Equals::Equals(NumericExpression* left, NumericExpression* right) : left(left), right(right) {
@@ -50,5 +50,5 @@ Equals::~Equals() {
 }
 
 string Equals::format() const {
-    return "(" + this->left->format() + " = " + this->right->format() + ")";
+    return this->left->format() + " = " + this->right->format();
 }

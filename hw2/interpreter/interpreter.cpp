@@ -30,10 +30,35 @@ void Interpreter::parse(std::istream& in) {
 
         if (ss[foundany] == 'I') {
             //if
-            cout << "inside if" << endl;
             ss.erase(foundany, 2);
+            
+            string linenumb = "";
+            size_t findjline = ss.find_last_of("1234567890");
+            unsigned int i = findjline;
 
-            BooleanExpression* ifbool = IfParse(linen, ss); 
+            while (isdigit(ss[i])) {
+                i--;
+            }
+
+            while (i < ss.length()) {
+                linenumb.push_back(ss[i]);
+                i++;
+            }
+            
+            
+            linenumb = cleanws(linenumb);
+            
+
+            stringstream conv(linenumb);
+            int lineval = 0;
+            conv >> lineval;
+            LineNum linej(lineval);
+
+            BooleanExpression* ifbool = IfParse(linen, ss);
+            IfC* ifcom = new IfC(ifbool, linej, linen);
+            cout << ifcom->format() << endl;
+
+            delete ifcom;
 
         }
         
@@ -41,19 +66,27 @@ void Interpreter::parse(std::istream& in) {
             size_t findarray = ss.find_first_of("[");
             ss.erase(foundany, 3);
             if (findarray == string::npos) {
-                cout << "no array" << endl;
+                
+                LetVar* letvarc = LetParse(ss, linen);
+                cout << letvarc->format() << endl;
 
+                delete letvarc;
             }
             else {
                 //array
                 cout << "array" << endl;
+
+                LetVarArray* letvararray = LetParseArr(ss, linen);
+                cout << letvararray->format() << endl;
+
+                delete letvararray;
 
             }
         }
 
         else if (ss[foundany] == 'G' && ss[foundany+2] == 'T') {
             //goto
-            //cout << "inside goto" << endl;
+
             ss.erase(foundany, 4);
 
             Goto* gotoc = GotoParse(linen, ss); 
@@ -64,7 +97,7 @@ void Interpreter::parse(std::istream& in) {
          
         else if (ss[foundany] == 'G' && ss[foundany+2] == 'S') {
             //gosub
-            //cout << "inside gosub" << endl;
+
             ss.erase(foundany, 5);
             
             GoSub* gosub = GosubParse(linen, ss); 
@@ -75,11 +108,10 @@ void Interpreter::parse(std::istream& in) {
 
         else if (ss[foundany] == 'P') {
             //print
-            //cout << "inside print" << endl;
+
             ss.erase(foundany, 5);
 
             NumericExpression* PNumEx = leftrightrec(ss);
-            //cout << "Left: " << PNumEx->format() << endl;
 
             Print* print = new Print(PNumEx, linen);
             cout << print->format() << endl;
@@ -90,7 +122,7 @@ void Interpreter::parse(std::istream& in) {
 
         else if (ss[foundany] == 'R') {
             //return
-            //cout << "inside return" << endl;
+
             ss.erase(foundany, 6);
 
             ReturnC* cretrun = new ReturnC(linen);
@@ -102,7 +134,7 @@ void Interpreter::parse(std::istream& in) {
 
         else if (ss[foundany] == 'E') {
             //end
-            //cout << "inside end" << endl;
+
             ss.erase(foundany, 3);
 
             EndC* cend = new EndC(linen);
@@ -118,12 +150,41 @@ void Interpreter::write(std::ostream& out) {
 
 }
 
-VarNum Interpreter::parseVar(string name) {
-    VarNum variable = VarNum(name, 0);
-    return variable;
+NumericExpression* Interpreter::parseVar(string name) {
+    unsigned int j = 0;
+    string varfind = "";
+    stringstream buffer ("");
+    stringstream arrnumex("");
 
+    size_t isvar = name.find_first_not_of("1234567890+/-* \t()[]");
+    size_t isarr = name.find_first_of("[");
+    size_t lastbr = name.find_last_of("]");
+    unsigned int variter = isvar;
+
+    while (isalpha(name[variter])) {
+        buffer << name[variter];
+        variter++;
+    }
+
+    if (isarr == string::npos) {
+        VarNum* variable = new VarNum(buffer.str(), 0);
+        return variable;
+    }
+    else if (name[isarr] == '[') {
+        j = isarr+1;
+        while(j != lastbr) {
+            arrnumex << name[j];
+            j++;
+        }
+
+        NumericExpression* varnumex = leftrightrec(arrnumex.str());
+
+        VarArray* vararray = new VarArray(varnumex, buffer.str());
+        return vararray;
+
+    }
+    return 0;
 }
-
 
 Constant Interpreter::parseConst(string value) {
     Constant constantVal = Constant(value);
@@ -141,14 +202,11 @@ string Interpreter::cleanws(string dirtystring) {
 
     return dirtystring;
 }
-
-
     
 NumericExpression* Interpreter::leftrightrec(string ss) {
     char oper = ' ';
     
     size_t isnum = ss.find_first_not_of("1234567890");
-    //cout << ss << endl;
     if (isnum == string::npos) {
         Constant* digit = new Constant(ss);
         return digit;
@@ -159,25 +217,15 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
         VarNum* variable = new VarNum(ss, 0);
         return variable;
     }
-
-    size_t isvararrayo = ss.find_first_of("[");
-    if (isvararrayo != string::npos) {}
     
     size_t foundopar = ss.find_first_of("(");
     size_t foundcpar = ss.find_last_of(")");
-    size_t foundop = ss.find_first_of("+-*/");
-    if (foundopar == string::npos || 
-        foundcpar == string::npos || 
-        foundop == string::npos) {
-        cerr << "invalid" << endl; 
-    }
 
 
     string copystr = ss.substr(foundopar+1, foundcpar-foundopar-1);
             
     copystr = cleanws(copystr);
             
-    //cout <<" a" << copystr << endl;
     
     int oparcount = 0;
     int cparcount = 0;
@@ -195,10 +243,7 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
         }
         iter++;
     }
-    //cout << "opar "<< oparcount << endl;
-    //cout << "cpar " <<cparcount << endl; 
-    //cout << "iter "<< iter << endl;
-    //cout << " past while " << endl;
+
     string copystropl = "";
     string copystropr = "";
     size_t opfind =  copystr.find_first_of("+-*/");
@@ -238,9 +283,13 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
         Multiplication* mult = new Multiplication(LeftEx, RightEx);
         return mult;
     }
+    size_t isvararr = ss.find_first_of("[");
+    if (isvararr != string::npos) {
+        NumericExpression* variarr = parseVar(ss);
+        return variarr;
+    }
     return 0;
 }
-
 
 Goto* Interpreter::GotoParse(LineNum line, string jline) {
     string jlinecopy = "";
@@ -286,8 +335,8 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
     size_t findfirst = ss.find_first_not_of(" \t");
     size_t findbool = ss.find_first_of("<>=");
     size_t findjline = ss.find_last_of("1234567890");
+    size_t findthen = ss.find("THEN");
     string linenumb = "";
-    char currnum = ' ';
     unsigned int i = findjline;
 
     while (isdigit(ss[i])) {
@@ -301,6 +350,7 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
 
     linenumb = cleanws(linenumb);
     ss.erase(ss.size()-linenumb.size(), linenumb.size());
+    ss.erase(findthen, ss.size()-findthen);
 
 
     string leftarg = "";
@@ -312,22 +362,15 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
     leftarg = ss.substr(findfirst, findbool-findfirst);
     rightside = ss.substr(findbool+1, ss.length()-findbool-1 );
 
-    size_t findrightargbeg = rightside.find_first_not_of(" \t");
-    size_t findrightargend = rightside.find_first_not_of(" \t");
     
     
     leftarg = cleanws(leftarg);
+    rightside = cleanws(rightside);
 
-    
-    //cout << ss << endl;
-    //cout << linenumb << endl;
-    cout <<leftarg << endl;
-    cout << boolop << endl;
-    cout << rightside <<endl;
 
 
     NumericExpression* LeftEx = leftrightrec(leftarg);
-    NumericExpression* RightEx = leftrightrec(rightarg);
+    NumericExpression* RightEx = leftrightrec(rightside);
 
     if (boolop == '<') {
         Less* less = new Less(LeftEx, RightEx);
@@ -346,5 +389,50 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
 
     return 0;
     //return NULL;
+
+}
+
+LetVar* Interpreter::LetParse(string ss, LineNum line) {
+ 
+    NumericExpression* parsedvar =  parseVar(ss);
+
+    size_t findVar = ss.find(parsedvar->format());
+    string novar = ss.substr(0, ss.size());
+
+    novar.erase(findVar, (parsedvar->format()).length());
+
+    novar = cleanws(novar);
+
+    NumericExpression* letvarnumex = leftrightrec(novar);
+
+
+    LetVar* letvarc = new LetVar(parsedvar, letvarnumex, line);
+
+
+    return letvarc;
+
+}
+
+LetVarArray* Interpreter::LetParseArr(string ss, LineNum line) {
+    
+    NumericExpression* parsedvar =  parseVar(ss);
+    cout << ss<<  endl;
+    size_t findArrayEnd = ss.find_last_of("]");
+    string novar = ss.substr(0, ss.size());
+
+    cout << findArrayEnd << endl;
+    cout  << parsedvar->format() << endl;
+
+    novar.erase(findArrayEnd, ss.length());
+
+    novar = cleanws(novar);
+
+    NumericExpression* letvarnumex = leftrightrec(novar);
+
+
+    LetVarArray* letvararr = new LetVarArray(parsedvar, letvarnumex, line);
+
+
+    return letvararr;
 
 }
