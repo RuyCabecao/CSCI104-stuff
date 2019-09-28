@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
-#include "interpreter/interpreter.h"
-#include "interpreter/command.h"
-#include "interpreter/boolean.h"
-#include "interpreter/arithmetic.h"
+#include "interpreter.h"
+#include "arithmetic.h"
+#include "boolean.h"
+#include "command.h"
+
 
 using namespace std;
 
@@ -15,6 +16,6 @@ int main(int argc, char* argv[]) {
 
     ifstream input(argv[1]);
     Interpreter interpreter(input);
-    //interpreter.write(cout);aa
+    //interpreter.write(cout);
     return 0;
 }
