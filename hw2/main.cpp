@@ -15,6 +15,6 @@ int main(int argc, char* argv[]) {
 
     ifstream input(argv[1]);
     Interpreter interpreter(input);
-    interpreter.write(cout);
+    //interpreter.write(cout);
     return 0;
 }

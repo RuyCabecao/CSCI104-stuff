@@ -1,6 +1,6 @@
 all: basic_interpreter
 
-basic_interpreter: interpreter/maintest.cpp interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o
+basic_interpreter: interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o
 	g++ -g -Wall main.cpp interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o -o basic_interpreter
 
 interpreter/arithmetic.o: interpreter/arithmetic.h interpreter/arithmetic.cpp
