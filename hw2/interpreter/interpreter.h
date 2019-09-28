@@ -14,11 +14,15 @@ public:
     void write(std::ostream& out);
     Constant parseConst(std::string v);
     VarNum parseVar(std::string n);  
-    void parseNumEx(NumericExpression* RecNumEx);
+
     std::string cleanws(std::string dirtystring);
     NumericExpression* leftrightrec(std::string);
     Goto* GotoParse(LineNum line, std::string);
     GoSub* GosubParse(LineNum line, std::string);
+
+    BooleanExpression* IfParse(LineNum line, std::string);
+
+
 
 private:
     void parse(std::istream& in);

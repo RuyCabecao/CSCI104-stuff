@@ -33,6 +33,8 @@ void Interpreter::parse(std::istream& in) {
             cout << "inside if" << endl;
             ss.erase(foundany, 2);
 
+            BooleanExpression* ifbool = IfParse(linen, ss); 
+
         }
         
         else if (ss[foundany] == 'L') {
@@ -40,7 +42,7 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 3);
             if (findarray == string::npos) {
                 cout << "no array" << endl;
-                
+
             }
             else {
                 //array
@@ -277,5 +279,72 @@ GoSub* Interpreter::GosubParse(LineNum line, string jline) {
 
     GoSub* gosubC = new GoSub(line, jlineclass);
     return gosubC;
+
+}
+
+BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
+    size_t findfirst = ss.find_first_not_of(" \t");
+    size_t findbool = ss.find_first_of("<>=");
+    size_t findjline = ss.find_last_of("1234567890");
+    string linenumb = "";
+    char currnum = ' ';
+    unsigned int i = findjline;
+
+    while (isdigit(ss[i])) {
+        i--;
+    }
+
+    while (i < ss.length()) {
+        linenumb.push_back(ss[i]);
+        i++;
+    }
+
+    linenumb = cleanws(linenumb);
+    ss.erase(ss.size()-linenumb.size(), linenumb.size());
+
+
+    string leftarg = "";
+    string rightarg = "";
+    string rightside = "";
+    
+    char boolop = ss[findbool];
+
+    leftarg = ss.substr(findfirst, findbool-findfirst);
+    rightside = ss.substr(findbool+1, ss.length()-findbool-1 );
+
+    size_t findrightargbeg = rightside.find_first_not_of(" \t");
+    size_t findrightargend = rightside.find_first_not_of(" \t");
+    
+    
+    leftarg = cleanws(leftarg);
+
+    
+    //cout << ss << endl;
+    //cout << linenumb << endl;
+    cout <<leftarg << endl;
+    cout << boolop << endl;
+    cout << rightside <<endl;
+
+
+    NumericExpression* LeftEx = leftrightrec(leftarg);
+    NumericExpression* RightEx = leftrightrec(rightarg);
+
+    if (boolop == '<') {
+        Less* less = new Less(LeftEx, RightEx);
+        return less;
+    }
+
+    else if (boolop == '=') {
+        Equals* equal = new Equals(LeftEx, RightEx);
+        return equal;
+    }
+
+    else if (boolop == '>') {
+        Greater* greater = new Greater(LeftEx, RightEx);
+        return greater;
+    }
+
+    return 0;
+    //return NULL;
 
 }
