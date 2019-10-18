@@ -1,0 +1,12 @@
+1)
+	a. A list of all the subjects' histories (string) i.e. index 0 has subject 0's history, index 1 has subject 1's history, and so on. 
+	
+	b. A set of strings with the names of all students that earned an A grade in CSCI 103.
+	
+	c. A map which has a student name key (string) that maps to a Student object containing all of the student's info (i.e. id # (unsigned int), (int) year, classes the student is currently taking (string), etc.) 
+	
+	d. A map which has a grade key (string if letter grade, double if GPA or %) that maps to a set of students (could be student objects, strings if only the student name, or unsigned ints if only student ids).
+
+2)  The code returns the Linked List 5, 4, 3, 2, 1. funcA  iterates through the original Linked List, breaking when reaching the last node, node 5. It then calls on funcB, which goes through the nodes and recursively changes the every node's next to the number 1 less than it i.e. node 4's next points to node 3, node 3's next points to node 2, and so on. Calling funcB(in)->next = NULL makes node 1 point to Null, successfully reversing the order of the Linked List, with the last node, now node 1, pointing to NULL.
+
+3)
