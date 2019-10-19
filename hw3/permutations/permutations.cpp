@@ -22,7 +22,7 @@ void permutationhelper(std::string in, long unsigned int start, long unsigned in
                                                 //letter of the string
         in[start] = copys[start];
         in[i] = copys[i]; //resets string to preserve functionality
-                          //of recursive calls
+                          //of next loop iteration
 
     }
 
