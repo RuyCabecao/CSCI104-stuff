@@ -24,7 +24,7 @@ The code returns the Linked List 5, 4, 3, 2, 1. funcA  iterates through the orig
 
 Question 3.
 
-a)Θ(n^3). S ince we're talking about worst-case scenarios, if every element inside array A is 0, then we get every loop to run all its iterations. This means that the outermost loop will run from i to n-1 (0 to n-1), the second outermost will run from j to i (also 0 to n-1), and lastly the innermost lopp will run from k to j (also 0 to n-1). This means that the program will run Θ(n-1) * Θ(n-1) * Θ(n-1) =  Θ((n-1)³), which simplifies to Θ(n³)
+a)Θ(n^3). Since we're talking about worst-case scenarios, if every element inside array A is 0, then we get every loop to run all its iterations. This means that the outermost loop will run from i to n-1 (0 to n-1), the second outermost will run from j to i (also 0 to n-1), and lastly the innermost lopp will run from k to j (also 0 to n-1). This means that the program will run Θ(n-1) * Θ(n-1) * Θ(n-1) =  Θ((n-1)³), which simplifies to Θ(n³)
 
 
 
