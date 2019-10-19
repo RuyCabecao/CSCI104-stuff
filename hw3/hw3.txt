@@ -24,7 +24,7 @@ The code returns the Linked List 5, 4, 3, 2, 1. funcA  iterates through the orig
 
 Question 3.
 
-a) Θ(n³). Since we're talking about worst-case scenarios, if every element inside array A is 0, then we get every loop to run all its iterations. This means that the outermost loop will run from i to n-1 (0 to n-1), the second outermost will run from j to i (also 0 to n-1), and lastly the innermost lopp will run from k to j (also 0 to n-1). This means that the program will run Θ(n-1) * Θ(n-1) * Θ(n-1) =  Θ((n-1)³), which simplifies to Θ(n³)
+a)Θ(n^3). S ince we're talking about worst-case scenarios, if every element inside array A is 0, then we get every loop to run all its iterations. This means that the outermost loop will run from i to n-1 (0 to n-1), the second outermost will run from j to i (also 0 to n-1), and lastly the innermost lopp will run from k to j (also 0 to n-1). This means that the program will run Θ(n-1) * Θ(n-1) * Θ(n-1) =  Θ((n-1)³), which simplifies to Θ(n³)
 
 
 
@@ -32,7 +32,7 @@ b) Θ(nlogn). The i in the for loop gets multiplied by 2 every iteration, theref
 
 
 
-c) Θ(n²logn). The first for loop that sets up all the pointers and values runs in n-1 times, which is Θ(n) runtime. The second loop is where things get interesting. The outermost for loop in this second part runs n times. The while loop inside it also runs n times since curr starts at the head. The if statement within the while loop triggers in a frequency of the floor of n/i. The for loop within the if statement runs n-1 times. Therefore, the runtime of the whole second loop is the summation of n²/i (simplified from (n-1)*(n/i)) from i = 0 to n. This equals to n² times the summation (1/i), which can be written as Θ(n²logn)
+c) Θ(n²logn). The first for loop that sets up all the pointers and values runs in n-1 times, which is Θ(n) runtime. The second loop is where things get interesting. The outermost for loop in this second part runs n times. The while loop inside it also runs n times since curr starts at the head. The if statement within the while loop triggers in a frequency of the floor of n/i. The for loop within the if statement runs n-1 times. Therefore, the runtime of the whole second loop is the summation of n²/i (simplified from (n-1)*(n/i)) from i = 0 to n. This equals to n² times the summation (1/i), which can be written assinc Θ(n²logn)
 
 
 
