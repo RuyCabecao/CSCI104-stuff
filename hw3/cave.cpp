@@ -1,5 +1,4 @@
-#include <map>
-#include <sstream>
+#include <stack>
 #include <fstream>
 #include <iostream>
 
@@ -11,65 +10,48 @@ int main(int argc, char *argv[]) {
     }
 
     std::ifstream ifile(argv[1]);
-    std::stringstream ss;
     std::string line;
-
-
-	std::map<char, int> caveMap;
-    caveMap['N'] = 0; //I implemented maps for this code,
-    caveMap['E'] = 0; //mapping every letter to an int
-    caveMap['S'] = 0; //representing how many times each
-    caveMap['W'] = 0; //direction occurs
+    std::stack<char> stick;
     
-    getline(ifile, line); //reads first line
-    while (!ifile.fail()) { //loops until end of file
-
-        if (line[0] == 'N') {
-            caveMap['N']++; //increments North map
+    while (getline(ifile, line)) { //loops until end of file
+        if(line == "" || line == " ") continue;
+        if (stick.empty() && (line[0] == 'N' || line[0] == 'S' || 
+        line[0] == 'W' || line[0] == 'E')) {
+            stick.push(line[0]); //add directions to stack
+                                 //if there's nothing there
         }
-        
+        else if (line[0] == 'N') {
+            if (stick.top() == 'S')
+                stick.pop(); //if South right after North,
+            else             //they cancel out
+                stick.push(line[0]);
+                //else, add direction to stack
+        }
         else if (line[0] == 'E') {
-            caveMap['E']++; //increments East map
+            if (stick.top() == 'W')
+                stick.pop(); //if West right after East,
+            else             //they cancel out
+                stick.push(line[0]);
+                //else, add direction to stack
         }
-
         else if (line[0] == 'S') {
-            caveMap['S']++; //increments South map
+            if (stick.top() == 'N')
+                stick.pop(); //if North right after South,
+            else             //they cancel out
+                stick.push(line[0]);
+                //else, add direction to stack
         }
-
         else if (line[0] == 'W') {
-            caveMap['W']++; //increments West map
+            if (stick.top() == 'E')
+                stick.pop(); //if East right after West,
+            else             //they cancel out
+                stick.push(line[0]);
+                //else, add direction to stack
         }
-	
-        getline(ifile, line); //takes in next line
     }
-    
-    int nsval = 0; //int that hold vertical distance
-    int ewval = 0; //int that hold horizontal distance
-    int dist = 0;  //int that holds total distance
-
-    //following lines calculate horiz and vert distances.
-    
-    //Since North and South cancel each other out and
-    //East and West cancel each other out, the total
-    //distance can be found my finding the difference
-    //between inputs.
-
-    if (caveMap['N'] > caveMap['S']) {
-        nsval = caveMap['N'] - caveMap['S'];
-    }
-    else if (caveMap['N'] < caveMap['S']) {
-        nsval = caveMap['S'] - caveMap['N'];
-    } 
-    if (caveMap['E'] > caveMap['W']) {
-        ewval = caveMap['E'] - caveMap['W'];
-    }
-    else if (caveMap['W'] < caveMap['E']) {
-        ewval = caveMap['W'] - caveMap['E'];
-    }
-
-    dist = nsval + ewval; //calculates total
-        
-    std::cout << dist << std::endl; //prints total
-
+    if (stick.empty())
+        std::cout << "0" << std::endl;
+    else 
+        std::cout << stick.size() << std::endl;
     return 0;
 }
