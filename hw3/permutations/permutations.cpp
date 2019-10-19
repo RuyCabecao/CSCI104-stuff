@@ -1,6 +1,6 @@
 #include <iostream>
 
-void permutationhelper(std::string in, unsigned int start, unsigned int length) {
+void permutationhelper(std::string in, long unsigned int start, long unsigned int length) {
     
     //Helper function because making the function with 
     //a single parameter was too hard.
@@ -13,7 +13,7 @@ void permutationhelper(std::string in, unsigned int start, unsigned int length) 
 
     std::string copys = in; //copy string to swap values
 
-    for (unsigned int i = start; i < length; i++) {
+    for (long unsigned int i = start; i < length; i++) {
         in[start] = copys[i]; //swaps values in order to get proper
         in[i] = copys[start]; //recursion calls, moving the letters
                               //around to cover all possibilities
