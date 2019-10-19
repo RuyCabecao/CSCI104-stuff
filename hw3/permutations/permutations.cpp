@@ -30,7 +30,6 @@ void permutationhelper(std::string in, int start, int length) {
 
 
 void permutations(std::string in) {
-    int length = in.length();
-    permutationhelper(in, 0, length);
+    permutationhelper(in, 0, in.length());
     //calls helper after defining length
 }
