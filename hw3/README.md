@@ -1,7 +1,7 @@
 # HW3 Readme
 
 ##### Permutations (Problem 4)
-- To compile run `g++ -g -Wall -std=c++11 permutations.cpp -o permutations`
+- To compile run `g++ -g -Wall -std=c++11 permutations/permutations.cpp -o permutations`
 - Needs main to input a string to the permutations function.
 
 ##### Cave Exploration (Problem 5)
