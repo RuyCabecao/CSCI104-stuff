@@ -1,4 +1,5 @@
 #include "interpreter.h"
+#include <stack>
 
 using namespace std;
 
@@ -62,9 +63,10 @@ void Interpreter::parse(std::istream& in) {
         
         else if (ss[foundany] == 'L') {
             //just a LetVar
-            size_t findarray = ss.find_first_of("[");
+            int i = 0;
             ss.erase(foundany, 3); //erases command from string
-            if (findarray == string::npos) { //checks for presence of array
+            while (isblank(ss[i]) || isalpha(ss[i])) i++;
+            if (ss[i] != '[') { //checks for presence of array
                 
                 LetVar* letvarc = LetParse(ss, linen);
                 cout << letvarc->format() << endl;
@@ -73,7 +75,6 @@ void Interpreter::parse(std::istream& in) {
             }
             else {
                 //LetVar with array  case
-
                 LetVarArray* letvararray = LetParseArr(ss, linen);
                 cout << letvararray->format() << endl;
 
@@ -108,9 +109,7 @@ void Interpreter::parse(std::istream& in) {
             //print command case
 
             ss.erase(foundany, 5); //erases command from string
-            cout << ss << endl;
             NumericExpression* PNumEx = leftrightrec(ss);
-            cout << PNumEx->format() << endl;
 
             Print* print = new Print(PNumEx, linen);
             cout << print->format() << endl;
@@ -156,8 +155,6 @@ NumericExpression* Interpreter::parseVar(string name) {
     stringstream arrnumex("");
 
     size_t isvar = name.find_first_not_of("1234567890+/-* \t()[]");
-    size_t isarr = name.find_first_of("[");// these find the start of the variable
-    size_t lastbr = name.find_last_of("]");// and the  array if they exist
     unsigned int variter = isvar; //unsigned int iterator     
 
     while (isalpha(name[variter])) {
@@ -165,19 +162,38 @@ NumericExpression* Interpreter::parseVar(string name) {
         variter++;//copies variable name
     }
 
-    if (isarr == string::npos) {
+    while (isblank(name[variter])) variter++;
+
+    if (name[variter] != '[') {
         VarNum* variable = new VarNum(buffer.str(), 0);
         return variable;
     }
-    else if (name[isarr] == '[') {
-        j = isarr+1;
-        while(j != lastbr) {    //if array is found, iterate
-            arrnumex << name[j];//through its values to store it
-            j++;                // as numerical expression
+
+    else if (name[variter] == '[') {
+        j = variter+1;
+        int tempj = j;
+        stack<char> checkbrack;
+        checkbrack.push(name[variter]);
+        arrnumex << name[variter];
+
+        while(!checkbrack.empty()) {    //if array is found, iterate
+            if (name[j] == '[') {
+                checkbrack.push(name[j]);
+            }//through its values to store it
+            else if(name[j] == ']') {          // as numerical expression
+                if (checkbrack.top() == '[') {
+                    checkbrack.pop();
+                }
+            }
+            arrnumex << name[j];
+            j++;
         }
+         string ssintostrf = arrnumex.str();
 
-        NumericExpression* varnumex = leftrightrec(arrnumex.str());
+        string ssintostr = ssintostrf.substr(1,j-tempj-1);
 
+
+        NumericExpression* varnumex = leftrightrec(ssintostr);
         VarArray* vararray = new VarArray(varnumex, buffer.str());
         return vararray;
 
@@ -185,8 +201,8 @@ NumericExpression* Interpreter::parseVar(string name) {
     return 0;
 }
 
-Constant Interpreter::parseConst(string value) {
-    Constant constantVal = Constant(value);
+NumericExpression* Interpreter::parseConst(string value) {
+    Constant* constantVal = new Constant(value);
     return constantVal; //parses constant
 
 }
@@ -203,112 +219,66 @@ string Interpreter::cleanws(string dirtystring) {
 }
     
 NumericExpression* Interpreter::leftrightrec(string ss) {
+    int numcount = 0;
+    string ss2 = cleanws(ss);
+    stack<char> parencheck;
+    size_t pos = 0;
+    pos = ss2.find_first_not_of(" \t");
     char oper = ' ';
-    string outstr = cleanws(ss);
-
-    size_t isnum = ss.find_first_not_of("1234567890 ");
-    if (isnum == string::npos) {
-        cout << "digit " << outstr << endl;
-        Constant* digit = new Constant(outstr); //checks if only constant 
-        return digit;                       //is left
+    
+    if (ss2[pos] == '-' || isdigit(ss2[pos])) {
+        return parseConst(ss2);
     }
-    
-    size_t isvar = ss.find_first_of("1234567890+/-*");
-    if (isvar == string::npos) {      
-        VarNum* variable = new VarNum(ss, 0);
-        return variable;                   //checks if only variable
-    }                                      //left
-    
-    size_t foundopar = ss.find_first_of("(");
-    size_t foundcpar = ss.find_last_of(")"); //finds  parentheses
 
+    else if (isalpha(ss2[pos])) {
+        return parseVar(ss2);
+    }
 
-    string copystr = ss.substr(foundopar+1, foundcpar-foundopar-1);
+    pos++;
+    while (true) {
+        if (ss2[pos] == '(') parencheck.push(ss2[pos]);
+        else if (ss2[pos] == ')') {
+            if (parencheck.top() == '(') {
+                parencheck.pop();
+            }
+        }
+        else if (isdigit(ss2[pos]) || isalpha(ss2[pos])) numcount++;  
 
-    copystr = cleanws(copystr);  //creates string of inside of paren
-            
-    
-    int oparcount = 0;
-    int cparcount = 0;
-    int validop = 0;
-    int iter = 0;
-    int isneg = 0;
-
-    while (validop == 0) { //finds outermost operator
-        if (copystr[iter] == '(') oparcount++;
-
-        else if (copystr[iter] == ')') cparcount++;
-    
-        if (oparcount == cparcount) {
-            validop = 1;
+        else if ((ss2[pos] == '*' || ss2[pos] == '/' || ss2[pos] == '+' 
+        || ss2[pos] == '-') && parencheck.empty() && numcount != 0) {
+            oper = ss2[pos];
             break;
         }
-        iter++;
+        pos++;
     }
 
-    string copystropl = "";
-    string copystropr = "";
-    size_t opfind =  copystr.find_first_of("+-*/"); //find outermost operator index
-        cout << "copy "<< copystr << " oper " << endl; 
-    
-    if (oparcount == 0) {
-        oper = copystr[opfind]; 
-        if (oper == '-')
-            isneg =  1;                             //case that no parentheses are found
-        copystropl = copystr.substr(0, opfind);     //and no operator found
-        copystropr = copystr.substr(opfind+1, copystr.length()-opfind-1);
 
-    }
+    string lscopy = ss2.substr(1, pos-1);
+    string rscopy = ss2.substr(pos+1, ss2.length()-pos-1);
 
-    else if (oparcount != 0) {                      //case that there are parentheses
-        oper = copystr[iter+1];
-        copystropl = copystr.substr(0, iter+1);
-        copystropr = copystr.substr(iter+2, copystr.length()-iter-1);
-    }
-    
-    size_t isvararr = ss.find_first_of("[");        //sees if array and creates 
-    if (isvararr != string::npos) {                 //NExp accordingly
-        NumericExpression* variarr = parseVar(ss);
-        return variarr;
-    }
+    NumericExpression* LeftEx = leftrightrec(lscopy); //recursive call of left
+    NumericExpression* RightEx = leftrightrec(rscopy);//and right
 
-    cout << "left "  << copystropl << endl;
-    cout << "right "  << copystropr << endl;
-    NumericExpression* LeftEx = leftrightrec(copystropl); //recursive call of left
-    NumericExpression* RightEx = leftrightrec(copystropr);//and right
-    cout  << " going to ops"  << oper << "a"<< endl;
-    cout << copystropl << " ; " << copystropr << endl;
 
     if (oper == '+') {  //if elses  to check for all possible operators
         Addition* add = new Addition(LeftEx, RightEx);
         return add;
     }
 
-    else if (oper == '-' && isneg == 0) {
+    else if (oper == '-') {
         Subtraction* subt = new Subtraction(LeftEx, RightEx);
         return subt;
     }
 
     else if (oper == '/') {
-        Division* div = new Division(LeftEx, RightEx);
-        return div;
+        Division* divs = new Division(LeftEx, RightEx);
+        return divs;
     }
 
     else if (oper == '*') {
         Multiplication* mult = new Multiplication(LeftEx, RightEx);
         return mult;
     }
-
-    else if (oper == '\0' || isneg == 1) {
-        if (isneg == 1) {
-            copystropr = '-' + copystropr;
-            Constant* negdig = new Constant(copystropr);
-            return negdig;
-        }
-        Constant* dig = new Constant(copystropl);
-        return dig;
-    }
-
     return 0;
 }
 
@@ -414,7 +384,7 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
 }
 
 LetVar* Interpreter::LetParse(string ss, LineNum line) {
- 
+    
     NumericExpression* parsedvar =  parseVar(ss);
 
     size_t findVar = ss.find(parsedvar->format());
@@ -422,7 +392,7 @@ LetVar* Interpreter::LetParse(string ss, LineNum line) {
 
     novar.erase(findVar, (parsedvar->format()).length());
 
-    novar = cleanws(novar);
+    //novar = cleanws(novar);
 
     NumericExpression* letvarnumex = leftrightrec(novar);
 
@@ -435,18 +405,30 @@ LetVar* Interpreter::LetParse(string ss, LineNum line) {
 }
 
 LetVarArray* Interpreter::LetParseArr(string ss, LineNum line) {
+    int i = 0;
     
     NumericExpression* parsedvar =  parseVar(ss);
 
-    size_t findArrayEnd = ss.find_last_of("]");
     string novar = ss.substr(0, ss.size());
 
-    novar.erase(0, findArrayEnd+1);
 
-    novar = cleanws(novar);
+    while(novar[i] != '[')  i++;
+
+    int brackcount = 1;
+    i++;
+
+    while(brackcount > 0) {    //if array is found, iterate
+        if (novar[i] == '[') {
+            brackcount++;
+        }//through its values to store it
+        else if(novar[i] == ']') {          // as numerical expression
+            brackcount--;
+        }
+        i++;
+    }
+    novar.erase(0, i);
 
     NumericExpression* letvarnumex = leftrightrec(novar);
-
 
     LetVarArray* letvararr = new LetVarArray(parsedvar, letvarnumex, line);
 

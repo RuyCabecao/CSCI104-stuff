@@ -1,0 +1,4 @@
+1 PRINT (1+2)
+2 PRINT (1    -X)
+3 PRINT (27*          Y)
+4 PRINT (X 	/				2)
