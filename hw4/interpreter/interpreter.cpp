@@ -1,5 +1,6 @@
 #include "interpreter.h"
 #include <stack>
+#include <vector>
 
 using namespace std;
 
@@ -14,12 +15,14 @@ Interpreter::~Interpreter() {
 
 void Interpreter::parse(std::istream& in) {
     string line;
+    vector<Command*> commandvec;
     while (getline(in, line)) {
         size_t line_number;
         stringstream stream(line);
         stream >> line_number;
         LineNum linen(line_number); //store line number as
         string ss = stream.str();   //line number class
+        
         
         size_t linenumend = ss.find_first_not_of("1234567890");
         ss.erase(0,linenumend); //delete line number
@@ -70,6 +73,7 @@ void Interpreter::parse(std::istream& in) {
                 
                 LetVar* letvarc = LetParse(ss, linen);
                 cout << letvarc->format() << endl;
+                commandvec.push_back(letvarc);
 
                 delete letvarc;
             }
@@ -77,6 +81,7 @@ void Interpreter::parse(std::istream& in) {
                 //LetVar with array  case
                 LetVarArray* letvararray = LetParseArr(ss, linen);
                 cout << letvararray->format() << endl;
+                commandvec.push_back(letvararray);
 
                 delete letvararray;
 
@@ -89,8 +94,9 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 4); //erases command from string
 
             Goto* gotoc = GotoParse(linen, ss); 
-            
             cout << gotoc->format() << endl;
+            commandvec.push_back(gotoc);
+
             delete gotoc;
         }
          
@@ -100,8 +106,9 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 5); //erases command from string
             
             GoSub* gosub = GosubParse(linen, ss); 
-            
             cout << gosub->format() << endl;
+            commandvec.push_back(gosub);
+
             delete gosub;
         }
 
@@ -113,6 +120,8 @@ void Interpreter::parse(std::istream& in) {
 
             Print* print = new Print(PNumEx, linen);
             cout << print->format() << endl;
+            commandvec.push_back(print);
+
             delete print;
 
 
@@ -125,6 +134,8 @@ void Interpreter::parse(std::istream& in) {
 
             ReturnC* cretrun = new ReturnC(linen);
             cout << cretrun->format() << endl;
+            commandvec.push_back(cretrun);
+
             delete cretrun;
             
         }
@@ -137,11 +148,14 @@ void Interpreter::parse(std::istream& in) {
 
             EndC* cend = new EndC(linen);
             cout << cend->format() << endl;
+            commandvec.push_back(cend);
+
             delete cend;
         }
-        
-
     }
+
+
+    
 }
 
 void Interpreter::write(std::ostream& out) {
@@ -155,6 +169,7 @@ NumericExpression* Interpreter::parseVar(string name) {
     stringstream arrnumex("");
 
     size_t isvar = name.find_first_not_of("1234567890+/-* \t()[]");
+    size_t lastbr = name.find_last_of("]");
     unsigned int variter = isvar; //unsigned int iterator     
 
     while (isalpha(name[variter])) {
@@ -164,8 +179,9 @@ NumericExpression* Interpreter::parseVar(string name) {
 
     while (isblank(name[variter])) variter++;
 
-    if (name[variter] != '[') {
+    if (name[variter] != '[' || lastbr == string::npos) {
         VarNum* variable = new VarNum(buffer.str(), 0);
+
         return variable;
     }
 
@@ -175,6 +191,7 @@ NumericExpression* Interpreter::parseVar(string name) {
         stack<char> checkbrack;
         checkbrack.push(name[variter]);
         arrnumex << name[variter];
+
 
         while(!checkbrack.empty()) {    //if array is found, iterate
             if (name[j] == '[') {
@@ -219,18 +236,19 @@ string Interpreter::cleanws(string dirtystring) {
 }
     
 NumericExpression* Interpreter::leftrightrec(string ss) {
+    int brcount = 0;
     int numcount = 0;
     string ss2 = cleanws(ss);
     stack<char> parencheck;
     size_t pos = 0;
-    pos = ss2.find_first_not_of(" \t");
     char oper = ' ';
     
+
     if (ss2[pos] == '-' || isdigit(ss2[pos])) {
         return parseConst(ss2);
     }
 
-    else if (isalpha(ss2[pos])) {
+    else if (isalpha(ss2[pos]) || ss2[pos+1] == '[') {
         return parseVar(ss2);
     }
 
@@ -242,19 +260,24 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
                 parencheck.pop();
             }
         }
+
+        else if (ss2[pos] == '[' || ss2[pos] == ']'){
+            if (ss2[pos] == '[') brcount++;
+            else if (ss2[pos] == ']') brcount--;
+        }
+
         else if (isdigit(ss2[pos]) || isalpha(ss2[pos])) numcount++;  
 
         else if ((ss2[pos] == '*' || ss2[pos] == '/' || ss2[pos] == '+' 
-        || ss2[pos] == '-') && parencheck.empty() && numcount != 0) {
+        || ss2[pos] == '-') && parencheck.empty() && numcount != 0 && brcount == 0) {
             oper = ss2[pos];
             break;
         }
         pos++;
     }
 
-
     string lscopy = ss2.substr(1, pos-1);
-    string rscopy = ss2.substr(pos+1, ss2.length()-pos-1);
+    string rscopy = ss2.substr(pos+1, ss2.length()-pos-2);
 
     NumericExpression* LeftEx = leftrightrec(lscopy); //recursive call of left
     NumericExpression* RightEx = leftrightrec(rscopy);//and right
@@ -353,13 +376,6 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
     leftarg = ss.substr(findfirst, findbool-findfirst);
     rightside = ss.substr(findbool+1, ss.length()-findbool-1 );
 
-    
-    
-    leftarg = cleanws(leftarg);
-    rightside = cleanws(rightside);
-
-
-
     NumericExpression* LeftEx = leftrightrec(leftarg);
     NumericExpression* RightEx = leftrightrec(rightside);
 
@@ -435,3 +451,15 @@ LetVarArray* Interpreter::LetParseArr(string ss, LineNum line) {
     return letvararr;
 
 }
+
+void Interpreter::Interpret(vector<Command*> commandvec) {
+    bool ended = false;
+
+    while(!ended) {
+
+
+
+    }
+
+}
+

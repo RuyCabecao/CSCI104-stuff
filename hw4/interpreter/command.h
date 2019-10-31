@@ -1,8 +1,6 @@
 #ifndef COMMAND_HPP
 #define COMMAND_HPP
 
-#include <string>
-#include <iostream>
 #include <sstream>
 #include "arithmetic.h"
 #include "boolean.h"

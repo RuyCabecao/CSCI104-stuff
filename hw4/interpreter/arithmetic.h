@@ -3,12 +3,14 @@
 
 #include <string>
 #include <iostream>
+#include <map>
 
 class NumericExpression {
 public:
     NumericExpression() {}
     virtual ~NumericExpression() {}
     virtual std::string format() const = 0;
+    virtual int getVal(std::map<std::string,std::map<int,int> > valmap) const = 0;
 };
 
 class Addition : public NumericExpression {
@@ -17,6 +19,7 @@ public:
     ~Addition();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
 
 private:
     NumericExpression* left;
@@ -29,6 +32,7 @@ public:
     ~Subtraction();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
 
 private:
     NumericExpression* left;
@@ -42,6 +46,7 @@ public:
     ~Multiplication();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
     
 private:
     NumericExpression* left;
@@ -54,6 +59,7 @@ public:
     ~Division();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
     
 private:
     NumericExpression* left;
@@ -67,6 +73,7 @@ public:
     ~Constant();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
     
 private:
     std::string value;
@@ -79,6 +86,7 @@ public:
     ~VarArray();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
     
 private:
     NumericExpression* index;
@@ -92,6 +100,7 @@ public:
     ~VarNum();
 
     std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> > valmap) const;
     
 private:
     std::string varName;

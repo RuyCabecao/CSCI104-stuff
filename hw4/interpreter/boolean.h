@@ -1,8 +1,6 @@
 #ifndef BOOLEAN_HPP
 #define BOOLEAN_HPP
 
-#include <string>
-#include <iostream>
 #include "arithmetic.h"
 
 class BooleanExpression {
