@@ -1,6 +1,4 @@
 #include "interpreter.h"
-#include <stack>
-#include <vector>
 
 using namespace std;
 
@@ -14,8 +12,11 @@ Interpreter::~Interpreter() {
 }
 
 void Interpreter::parse(std::istream& in) {
+    int linecount = 0;
     string line;
+    map<int,int> linemap;
     vector<Command*> commandvec;
+    //stack<LineNum> Jlinestack;
     while (getline(in, line)) {
         size_t line_number;
         stringstream stream(line);
@@ -59,9 +60,12 @@ void Interpreter::parse(std::istream& in) {
 
             BooleanExpression* ifbool = IfParse(linen, ss);
             IfC* ifcom = new IfC(ifbool, linej, linen);
-            cout << ifcom->format() << endl; 
+            //cout << ifcom->format() << endl; 
 
-            delete ifcom;
+            commandvec.push_back(ifcom);
+            linemap[ifcom->getLine()]=linecount;
+
+            //delete ifcom;
         }
         
         else if (ss[foundany] == 'L') {
@@ -72,18 +76,20 @@ void Interpreter::parse(std::istream& in) {
             if (ss[i] != '[') { //checks for presence of array
                 
                 LetVar* letvarc = LetParse(ss, linen);
-                cout << letvarc->format() << endl;
+                //cout << letvarc->format() << endl;
                 commandvec.push_back(letvarc);
+                linemap[letvarc->getLine()]=linecount;
 
-                delete letvarc;
+                //delete letvarc;
             }
             else {
                 //LetVar with array  case
                 LetVarArray* letvararray = LetParseArr(ss, linen);
-                cout << letvararray->format() << endl;
+                //cout << letvararray->format() << endl;
                 commandvec.push_back(letvararray);
+                linemap[letvararray->getLine()]=linecount;
 
-                delete letvararray;
+                //delete letvararray;
 
             }
         }
@@ -94,10 +100,12 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 4); //erases command from string
 
             Goto* gotoc = GotoParse(linen, ss); 
-            cout << gotoc->format() << endl;
+            //cout << gotoc->format() << endl;
             commandvec.push_back(gotoc);
+            linemap[gotoc->getLine()]=linecount;
+            //Jlinestack.push(gotoc->getJline());
 
-            delete gotoc;
+            //delete gotoc;
         }
          
         else if (ss[foundany] == 'G' && ss[foundany+2] == 'S') {
@@ -106,10 +114,12 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 5); //erases command from string
             
             GoSub* gosub = GosubParse(linen, ss); 
-            cout << gosub->format() << endl;
+            //cout << gosub->format() << endl;
             commandvec.push_back(gosub);
+            linemap[gosub->getLine()]=linecount;
+            //Jlinestack.push(gosub->getJline());
 
-            delete gosub;
+            //delete gosub;
         }
 
         else if (ss[foundany] == 'P') {
@@ -119,10 +129,11 @@ void Interpreter::parse(std::istream& in) {
             NumericExpression* PNumEx = leftrightrec(ss);
 
             Print* print = new Print(PNumEx, linen);
-            cout << print->format() << endl;
+            //cout << print->format() << endl;
             commandvec.push_back(print);
+            linemap[print->getLine()]=linecount;
 
-            delete print;
+            //delete print;
 
 
         }
@@ -133,10 +144,11 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 6); //erases command from string
 
             ReturnC* cretrun = new ReturnC(linen);
-            cout << cretrun->format() << endl;
+            //cout << cretrun->format() << endl;
             commandvec.push_back(cretrun);
+            linemap[cretrun->getLine()]=linecount;
 
-            delete cretrun;
+            //delete cretrun;
             
         }
 
@@ -147,14 +159,16 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 3); //erases command from string
 
             EndC* cend = new EndC(linen);
-            cout << cend->format() << endl;
+            //cout << cend->format() << endl;
             commandvec.push_back(cend);
+            linemap[cend->getLine()]=linecount;
 
-            delete cend;
+            //delete cend;
         }
+        linecount++;
     }
 
-
+    Interpret(commandvec, linemap);
     
 }
 
@@ -309,8 +323,7 @@ Goto* Interpreter::GotoParse(LineNum line, string jline) {
     string jlinecopy = "";
     int jlineint = 0;
 
-    
-    size_t linebeg = jline.find_first_of("1234567890");//find indices
+    size_t linebeg = jline.find_first_of("1234567890-");//find indices
     size_t lineend = jline.find_last_of("1234567890");//of line value
 
     jlinecopy = jline.substr(linebeg, lineend - linebeg+1);//get just line value
@@ -328,9 +341,9 @@ Goto* Interpreter::GotoParse(LineNum line, string jline) {
 GoSub* Interpreter::GosubParse(LineNum line, string jline) {
     string jlinecopy = "";
     int jlineint = 0;
-                                //this function deos the same as goto
+                                //this function does the same as goto
                                 //just with different format
-    size_t linebeg = jline.find_first_of("1234567890");
+    size_t linebeg = jline.find_first_of("1234567890-");
     size_t lineend = jline.find_last_of("1234567890");
 
     jlinecopy = jline.substr(linebeg, lineend - linebeg+1);
@@ -452,14 +465,118 @@ LetVarArray* Interpreter::LetParseArr(string ss, LineNum line) {
 
 }
 
-void Interpreter::Interpret(vector<Command*> commandvec) {
+void Interpreter::Interpret(vector<Command*> commandvec, map<int,int> linemap) {
     bool ended = false;
+    map<string,map<int,int> > valmap;
+    stack<int> returnstack;
+    unsigned int i = 0;
+    int lineiter = 0;
 
-    while(!ended) {
+
+    while(i<commandvec.size()) {
+        //cout << "iteration " << i << endl;
+
+        if (commandvec[i]->getCommName() == "PRINT") {
+            if (commandvec[i]->getVal(valmap) == 2147483646) break;
+            cout << commandvec[i]->getVal(valmap) << endl;
+        }
+
+        else if (commandvec[i]->getCommName() == "LET") {
+            commandvec[i]->getVal(valmap);
+        }
+
+        else if (commandvec[i]->getCommName() == "LETARR") {
+            commandvec[i]->getVal(valmap);  
+        }
+
+        else if (commandvec[i]->getCommName() == "GOTO") {
+            if (linemap.count(commandvec[i]->getJline()) > 0) {
+                i = commandvec[i]->getJline();
+                i = linemap[i];
+                continue;
+            }
+            else {
+                cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                cout << "GOTO to non-existent line ";
+                cout << commandvec[i]->getJline() << "." << endl;
+                break;
+            }
+        }
+
+        else if (commandvec[i]->getCommName() == "IF") {
+            
+            if (linemap.count(commandvec[i]->getJline()) == 0){
+                cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                cout << "IF jump to non-existent line ";
+                cout << commandvec[i]->getJline() << "." << endl;
+                break;
+            }
+            
+            else if (commandvec[i]->getVal(valmap) == 1 && 
+            linemap.count(commandvec[i]->getJline()) > 0) {
+                i = commandvec[i]->getJline();
+                i = linemap[i];
+                continue;
+            }
+
+            else if (commandvec[i]->getVal(valmap) == 0) {
+                i++;
+                continue;
+            }
+            
+
+        }
+
+        else if (commandvec[i]->getCommName() == "GOSUB") {
+            if (linemap.count(commandvec[i]->getJline()) == 0){
+                cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                cout << "GOSUB to non-existent line ";
+                cout << commandvec[i]->getJline() << "." << endl;
+                break;
+            }
+
+            else {
+                returnstack.push(commandvec[i]->getLine());
+                i = commandvec[i]->getJline();
+                i = linemap[i];
+                continue;
+            }
 
 
+
+        }
+
+        else if (commandvec[i]->getCommName() == "RETURN") {
+            if (returnstack.empty()) {
+                cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                cout << "No matching GOSUB for RETURN." << endl;
+                break;
+            }
+            else {
+                i = returnstack.top();
+                returnstack.pop();
+                i = linemap[i];
+            }
+        }
+
+        else if (commandvec[i]->getCommName() == "END") {
+            break;
+        }
+
+        i++;
 
     }
 
+    
+    
+    int j = 0;
+    ended = false;
+    while(!ended) {
+        Command* tempc = commandvec.back();
+        commandvec.pop_back();
+        delete tempc;
+        if (commandvec.empty()) ended = true;
+        j++;
+    }
 }
 

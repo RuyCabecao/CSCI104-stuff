@@ -19,6 +19,20 @@ string Print::format() const{
 
 }
 
+int Print::getLine() const{
+    return this->line.getLine();
+}
+
+int Print::getVal(map<string,map<int,int> >& valmap) const {
+    int value = this->target->getVal(valmap);
+    return value;
+}
+
+string Print::getCommName() const{
+    return "PRINT";
+}
+
+
 //////////////////////////////////////////
 
 LetVar::LetVar(NumericExpression* var, NumericExpression* NExp, LineNum line) : var(var), NExp(NExp) , line(line) {
@@ -41,6 +55,26 @@ string LetVar::format() const{
 
 }
 
+int LetVar::getLine() const{
+    return this->line.getLine();
+}
+
+int LetVar::getVal(map<string,map<int,int> >& valmap) const {
+    int value = this->NExp->getVal(valmap);
+    map<int,int> tempmap;
+
+    tempmap[696969696] = value;
+    valmap[var->getName()] = tempmap;
+    return value;
+}
+
+string LetVar::getCommName() const{
+    return "LET";
+}
+
+
+
+
 //////////////////////////////////////////
 
 LetVarArray::LetVarArray(NumericExpression* vararr, NumericExpression* NExp, LineNum line) : vararr(vararr), NExp(NExp), line(line) {
@@ -62,6 +96,27 @@ string LetVarArray::format() const{
 
 }
 
+int LetVarArray::getLine() const{
+    return this->line.getLine();
+
+}
+
+int LetVarArray::getVal(map<string,map<int,int> >& valmap) const {
+    int access = this->vararr->getIndex(valmap);
+    int value = this->NExp->getVal(valmap);
+    string name = this->vararr->getName();
+    map<int,int> tempmap;
+    
+    tempmap[access]=value;
+    valmap[vararr->getName()]=tempmap;
+    
+    return value;
+}
+
+string LetVarArray::getCommName() const{
+    return "LETARR";
+}
+
 //////////////////////////////////////////
 
 Goto::Goto(LineNum line, LineNum jLine) : line(line), jLine(jLine) {
@@ -79,6 +134,19 @@ string Goto::format() const{
 
 }
 
+int Goto::getLine() const{
+    return this->line.getLine();
+}
+
+int Goto::getJline() const{
+    return this->jLine.getLine();
+} 
+
+string Goto::getCommName() const{
+    return "GOTO";
+}
+
+
 //////////////////////////////////////////
 
 IfC::IfC(BooleanExpression* cond, LineNum jLine, LineNum line) : cond(cond), jLine(jLine), line(line) {
@@ -90,12 +158,27 @@ IfC::~IfC() {
     if (cond) {
         delete this->cond;
     }
-
 }
 
 string IfC::format() const{
-    return this->line.format() + " IF [" + this->cond->format() + "] THEN <" + this->jLine.format() + ">"; 
+    return this->line.format() + " IF [" + this->cond->format() + "] THEN <" + this->jLine.format() + ">";
+}
 
+int IfC::getLine() const{
+    return this->line.getLine();
+}
+
+int IfC::getJline() const{
+    return this->jLine.getLine();
+} 
+
+int IfC::getVal(map<string,map<int,int> >& valmap) const {
+    int value = this->cond->getVal(valmap);
+    return value;
+}
+
+string IfC::getCommName() const{
+    return "IF";
 }
 
 //////////////////////////////////////////
@@ -115,6 +198,19 @@ string GoSub::format() const{
 
 }
 
+int GoSub::getLine() const{
+    return this->line.getLine();
+}
+
+int GoSub::getJline() const{
+    return this->jLine.getLine();
+} 
+
+string GoSub::getCommName() const{
+    return "GOSUB";
+}
+
+
 //////////////////////////////////////////
 
 ReturnC::ReturnC(LineNum line) : line(line) {
@@ -132,6 +228,14 @@ string ReturnC::format() const{
 
 }
 
+int ReturnC::getLine() const{
+    return this->line.getLine();
+}
+
+string ReturnC::getCommName() const{
+    return "RETURN";
+}
+
 //////////////////////////////////////////
 
 EndC::EndC(LineNum line) : line(line) {
@@ -146,7 +250,14 @@ EndC::~EndC() {
 
 string EndC::format() const{
     return this->line.format() + " END";
+}
 
+int EndC::getLine() const{
+    return this->line.getLine();
+}
+
+string EndC::getCommName() const{
+    return "END";
 }
 
 /////////////////////////////////////////
@@ -165,5 +276,12 @@ string LineNum::format() const{
     stringstream out;
     out << line;
     return  out.str();
+}
 
+int LineNum::getLine() const{
+    return line;
+}
+
+string LineNum::getCommName() const{
+    return "LINE";
 }

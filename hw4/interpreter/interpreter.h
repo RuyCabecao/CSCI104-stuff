@@ -2,6 +2,8 @@
 #define INTERPRETER_HPP
 
 #include "command.h"
+#include <vector>
+#include <stack>
 
 class Interpreter {
 public:
@@ -23,8 +25,7 @@ public:
     LetVar* LetParse(std::string ss, LineNum line);
     LetVarArray* LetParseArr(std::string ss, LineNum line);
 
-
-    void Interpret(vector<Command*> commandvec);
+    void Interpret(std::vector<Command*> cvec, std::map<int,int> linemap);
 
 
 private:

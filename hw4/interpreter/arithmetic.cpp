@@ -19,7 +19,7 @@ string Addition::format() const {
     return "(" + this->left->format() + " + " + this->right->format() + ")";
 }
 
-int Addition::getVal(map<string,map<int,int> > valmap) const {
+int Addition::getVal(map<string,map<int,int> >& valmap) const {
     int leftex = this->left->getVal(valmap);
     int rightex = this->right->getVal(valmap);
     return leftex + rightex;
@@ -42,7 +42,7 @@ string Subtraction::format() const {
     return "(" + this->left->format() + " - " + this->right->format() + ")";
 }
 
-int Subtraction::getVal(map<string,map<int,int> > valmap) const {
+int Subtraction::getVal(map<string,map<int,int> >& valmap) const {
     int leftex = this->left->getVal(valmap);
     int rightex = this->right->getVal(valmap);
     return leftex - rightex;
@@ -66,7 +66,7 @@ string Multiplication::format() const {
     return "(" + this->left->format() + " * " + this->right->format() + ")";
 }
 
-int Multiplication::getVal(map<string,map<int,int> > valmap) const {
+int Multiplication::getVal(map<string,map<int,int> >& valmap) const {
     int leftex = this->left->getVal(valmap);
     int rightex = this->right->getVal(valmap);
     return leftex * rightex;
@@ -89,10 +89,16 @@ string Division::format() const {
     return "(" + this->left->format() + " / " + this->right->format() + ")";
 }
 
-int Division::getVal(map<string,map<int,int> > valmap) const {
+int Division::getVal(map<string,map<int,int> >& valmap) const {
     int leftex = this->left->getVal(valmap);
     int rightex = this->right->getVal(valmap);
-    return leftex / rightex;
+    
+    if (rightex != 0) return leftex / rightex;
+    else {
+        cout << "Division by 0: " << this->left->format() << " = " << leftex;
+        cout << ", " << this->right->format() << " = "<< rightex << "." << endl;
+        exit(0);
+    }
 }
 
 Constant::Constant(string value) : value(value) {
@@ -108,7 +114,7 @@ string Constant::format() const {
 
 }
 
-int Constant::getVal(map<string,map<int,int> > valmap) const {
+int Constant::getVal(map<string,map<int,int> >& valmap) const {
     return stoi(value);
 }
 
@@ -126,12 +132,20 @@ string VarArray::format() const {
     return this->varArrName + "[" + this->index->format() + "]";
 }
 
-int VarArray::getVal(map<string,map<int,int> > valmap) const {
-    
-    
-    int access = this->index->getVal(valmap);
+int VarArray::getVal(map<string,map<int,int> >& valmap) const {
+    if(valmap.count(varArrName) == 0) {
+        valmap[varArrName][index->getVal(valmap)] = 0;
+    }
 
-    return valmap[varArrName][access];
+    return valmap[varArrName][index->getVal(valmap)];
+}
+string VarArray::getName() const {
+    return this->varArrName;
+
+}
+
+int VarArray::getIndex(map<string,map<int,int> >& valmap) const {
+    return this->index->getVal(valmap);
 }
 
 VarNum::VarNum(string varName, int content) : varName(varName), content(content){
@@ -149,8 +163,21 @@ string VarNum::format() const {
 
 }
 
-int VarNum::getVal(map<string,map<int,int> > valmap) const {
+int VarNum::getVal(map<string,map<int,int> >& valmap) const {
+    
+    if(valmap.count(varName) == 0) {
+        valmap[varName][696969696] = 0;
+    }
 
     return valmap[varName][696969696];
     
+}
+
+string VarNum::getName() const {
+    return this->varName;
+
+}
+
+int VarNum::getIndex(map<string,map<int,int> >& valmap) const {
+    return 696969696;
 }

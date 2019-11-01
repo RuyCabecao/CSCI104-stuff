@@ -11,6 +11,12 @@ public:
     Command() {}
     virtual ~Command() {}
     virtual std::string format() const = 0;
+    virtual int getLine() const = 0;
+    virtual int getJline() const {return 0;};
+    virtual int getVal(std::map<std::string,std::map<int,int> >& valmap) const {
+        return 0;
+    };
+    virtual std::string getCommName() const = 0;
 };
 
 class LineNum : public Command{
@@ -19,7 +25,9 @@ public:
     ~LineNum();
 
     std::string format() const;
-    
+    int getLine() const;
+    std::string getCommName() const;
+
 private:
     int line;
 
@@ -30,6 +38,9 @@ public:
     Print(NumericExpression* target, LineNum line);
     ~Print();
     std::string format() const;
+    int getLine() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
+    std::string getCommName() const;
 
 private:
     NumericExpression* target;
@@ -42,6 +53,9 @@ public:
     LetVar(NumericExpression* var, NumericExpression* NExp, LineNum line);
     ~LetVar();
     std::string format() const;
+    int getLine() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
+    std::string getCommName() const;
 
 private:
     NumericExpression* var;
@@ -55,6 +69,9 @@ public:
     LetVarArray(NumericExpression* vararr, NumericExpression* NExp, LineNum line);
     ~LetVarArray();
     std::string format() const;
+    int getLine() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
+    std::string getCommName() const;
 
 private:
     NumericExpression* vararr;
@@ -68,6 +85,9 @@ public:
     Goto(LineNum line, LineNum jLine);
     ~Goto();
     std::string format() const;
+    int getLine() const;
+    int getJline() const;
+    std::string getCommName() const;
 
 private:
     LineNum line;
@@ -80,6 +100,10 @@ public:
     IfC(BooleanExpression* cond, LineNum jLine, LineNum line);
     ~IfC();
     std::string format() const;
+    int getLine() const;
+    int getJline() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
+    std::string getCommName() const;
 
 private:
     BooleanExpression* cond;
@@ -93,6 +117,9 @@ public:
     GoSub(LineNum line, LineNum jLine);
     ~GoSub();
     std::string format() const;
+    int getLine() const;
+    int getJline() const;
+    std::string getCommName() const;
 
 private:
     LineNum line;
@@ -104,6 +131,8 @@ public:
     ReturnC(LineNum line);
     ~ReturnC();
     std::string format() const;
+    int getLine() const;
+    std::string getCommName() const;
 
 private:
     LineNum line;
@@ -115,6 +144,8 @@ public:
     EndC(LineNum line);
     ~EndC();
     std::string format() const;
+    int getLine() const;
+    std::string getCommName() const;
 
 private:
     LineNum line;

@@ -8,6 +8,7 @@ public:
     BooleanExpression() {}
     virtual ~BooleanExpression() {}
     virtual std::string format() const = 0;
+    virtual int getVal(std::map<std::string,std::map<int,int> >& valmap) const = 0;
 };
 
 
@@ -17,6 +18,7 @@ public:
     ~Greater();
 
     virtual std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
 
 private:
     NumericExpression* left;
@@ -30,6 +32,7 @@ public:
     ~Less();
 
     virtual std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
 
 private:
     NumericExpression* left;
@@ -43,6 +46,7 @@ public:
     ~Equals();
 
     virtual std::string format() const;
+    int getVal(std::map<std::string,std::map<int,int> >& valmap) const;
 
 private:
     NumericExpression* left;
