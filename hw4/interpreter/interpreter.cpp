@@ -253,7 +253,7 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
     int brcount = 0;
     int numcount = 0;
     string ss2 = cleanws(ss);
-    stack<char> parencheck;
+    stack<char> parencheck; //changed my implementation to use stacks
     size_t pos = 0;
     char oper = ' ';
     
@@ -470,7 +470,6 @@ void Interpreter::Interpret(vector<Command*> commandvec, map<int,int> linemap) {
     map<string,map<int,int> > valmap;
     stack<int> returnstack;
     unsigned int i = 0;
-    int lineiter = 0;
 
 
     while(i<commandvec.size()) {
@@ -505,7 +504,12 @@ void Interpreter::Interpret(vector<Command*> commandvec, map<int,int> linemap) {
 
         else if (commandvec[i]->getCommName() == "IF") {
             
-            if (linemap.count(commandvec[i]->getJline()) == 0){
+            if (commandvec[i]->getVal(valmap) == 0) {
+                i++;
+                continue;
+            }
+
+            else if (linemap.count(commandvec[i]->getJline()) == 0){
                 cout << "Error in line " << commandvec[i]->getLine() <<": ";
                 cout << "IF jump to non-existent line ";
                 cout << commandvec[i]->getJline() << "." << endl;
@@ -518,12 +522,6 @@ void Interpreter::Interpret(vector<Command*> commandvec, map<int,int> linemap) {
                 i = linemap[i];
                 continue;
             }
-
-            else if (commandvec[i]->getVal(valmap) == 0) {
-                i++;
-                continue;
-            }
-            
 
         }
 
