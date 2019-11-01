@@ -1,4 +1,6 @@
 #include "arithmetic.h"
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -95,9 +97,11 @@ int Division::getVal(map<string,map<int,int> >& valmap) const {
     
     if (rightex != 0) return leftex / rightex;
     else {
-        cout << "Division by 0: " << this->left->format() << " = " << leftex;
-        cout << ", " << this->right->format() << " = "<< rightex << "." << endl;
-        exit(0);
+        std::stringstream  ss;
+        ss << "Division by 0: " << this->left->format() << " = " << leftex;
+        ss << ", " << this->right->format() << " = "<< rightex << "." << endl;
+        std::string except  = ss.str();
+        throw(except);
     }
 }
 

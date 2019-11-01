@@ -63,8 +63,10 @@ int LetVar::getVal(map<string,map<int,int> >& valmap) const {
     int value = this->NExp->getVal(valmap);
     map<int,int> tempmap;
 
+    tempmap = valmap[var->getName()];
     tempmap[696969696] = value;
     valmap[var->getName()] = tempmap;
+    
     return value;
 }
 
@@ -106,7 +108,8 @@ int LetVarArray::getVal(map<string,map<int,int> >& valmap) const {
     int value = this->NExp->getVal(valmap);
     string name = this->vararr->getName();
     map<int,int> tempmap;
-    
+
+    tempmap = valmap[vararr->getName()];
     tempmap[access]=value;
     valmap[vararr->getName()]=tempmap;
     

@@ -15,8 +15,11 @@ void Interpreter::parse(std::istream& in) {
     int linecount = 0;
     string line;
     map<int,int> linemap;
-    vector<Command*> commandvec;
-    //stack<LineNum> Jlinestack;
+    //map that will hold line numbers at proper indices 
+    //i.e. if lines go in 10s, I can still count them by 1
+    //in order to use them together with my command vector
+    vector<Command*> commandvec; 
+    //vector that will hold all commands
     while (getline(in, line)) {
         size_t line_number;
         stringstream stream(line);
@@ -34,7 +37,7 @@ void Interpreter::parse(std::istream& in) {
         size_t foundany = ss.find_first_not_of(" \t"); //take in first
                                                        //non-ws value
         if (ss[foundany] == 'I') {                     //to read commands
-            //if cas
+            //if case
             ss.erase(foundany, 2); //erases command from string
             
             string linenumb = "";
@@ -60,12 +63,9 @@ void Interpreter::parse(std::istream& in) {
 
             BooleanExpression* ifbool = IfParse(linen, ss);
             IfC* ifcom = new IfC(ifbool, linej, linen);
-            //cout << ifcom->format() << endl; 
 
             commandvec.push_back(ifcom);
             linemap[ifcom->getLine()]=linecount;
-
-            //delete ifcom;
         }
         
         else if (ss[foundany] == 'L') {
@@ -76,20 +76,15 @@ void Interpreter::parse(std::istream& in) {
             if (ss[i] != '[') { //checks for presence of array
                 
                 LetVar* letvarc = LetParse(ss, linen);
-                //cout << letvarc->format() << endl;
                 commandvec.push_back(letvarc);
                 linemap[letvarc->getLine()]=linecount;
 
-                //delete letvarc;
             }
             else {
                 //LetVar with array  case
                 LetVarArray* letvararray = LetParseArr(ss, linen);
-                //cout << letvararray->format() << endl;
                 commandvec.push_back(letvararray);
                 linemap[letvararray->getLine()]=linecount;
-
-                //delete letvararray;
 
             }
         }
@@ -100,12 +95,9 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 4); //erases command from string
 
             Goto* gotoc = GotoParse(linen, ss); 
-            //cout << gotoc->format() << endl;
+
             commandvec.push_back(gotoc);
             linemap[gotoc->getLine()]=linecount;
-            //Jlinestack.push(gotoc->getJline());
-
-            //delete gotoc;
         }
          
         else if (ss[foundany] == 'G' && ss[foundany+2] == 'S') {
@@ -114,12 +106,10 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 5); //erases command from string
             
             GoSub* gosub = GosubParse(linen, ss); 
-            //cout << gosub->format() << endl;
+
             commandvec.push_back(gosub);
             linemap[gosub->getLine()]=linecount;
-            //Jlinestack.push(gosub->getJline());
 
-            //delete gosub;
         }
 
         else if (ss[foundany] == 'P') {
@@ -129,11 +119,10 @@ void Interpreter::parse(std::istream& in) {
             NumericExpression* PNumEx = leftrightrec(ss);
 
             Print* print = new Print(PNumEx, linen);
-            //cout << print->format() << endl;
+
             commandvec.push_back(print);
             linemap[print->getLine()]=linecount;
 
-            //delete print;
 
 
         }
@@ -144,11 +133,8 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 6); //erases command from string
 
             ReturnC* cretrun = new ReturnC(linen);
-            //cout << cretrun->format() << endl;
             commandvec.push_back(cretrun);
             linemap[cretrun->getLine()]=linecount;
-
-            //delete cretrun;
             
         }
 
@@ -159,17 +145,15 @@ void Interpreter::parse(std::istream& in) {
             ss.erase(foundany, 3); //erases command from string
 
             EndC* cend = new EndC(linen);
-            //cout << cend->format() << endl;
             commandvec.push_back(cend);
             linemap[cend->getLine()]=linecount;
 
-            //delete cend;
         }
         linecount++;
     }
 
-    Interpret(commandvec, linemap);
-    
+    Interpret(commandvec, linemap); //does all the heavylifting
+                                //(calculates, stores variables, etc.)
 }
 
 void Interpreter::write(std::ostream& out) {
@@ -207,24 +191,26 @@ NumericExpression* Interpreter::parseVar(string name) {
         arrnumex << name[variter];
 
 
-        while(!checkbrack.empty()) {    //if array is found, iterate
-            if (name[j] == '[') {
-                checkbrack.push(name[j]);
-            }//through its values to store it
-            else if(name[j] == ']') {          // as numerical expression
+        while(!checkbrack.empty()) {     //if array is found, iterate
+            if (name[j] == '[') {        //through its values to store it
+                checkbrack.push(name[j]);//as numerical expression
+            }
+            else if(name[j] == ']') {          
                 if (checkbrack.top() == '[') {
-                    checkbrack.pop();
-                }
+                    checkbrack.pop();//checks if entire index was copied
+                }                    //allows for arrays within arrays
             }
             arrnumex << name[j];
             j++;
         }
-         string ssintostrf = arrnumex.str();
+        string ssintostrf = arrnumex.str();
 
         string ssintostr = ssintostrf.substr(1,j-tempj-1);
-
+        //strings that hold index contents
 
         NumericExpression* varnumex = leftrightrec(ssintostr);
+        //recursive call to parse variable numeric expressions
+
         VarArray* vararray = new VarArray(varnumex, buffer.str());
         return vararray;
 
@@ -253,18 +239,18 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
     int brcount = 0;
     int numcount = 0;
     string ss2 = cleanws(ss);
-    stack<char> parencheck; //changed my implementation to use stacks
-    size_t pos = 0;
-    char oper = ' ';
+    stack<char> parencheck; //changed my implementation
+    size_t pos = 0;         //to use stacks like I did with
+    char oper = ' ';        //the variable array
     
 
     if (ss2[pos] == '-' || isdigit(ss2[pos])) {
         return parseConst(ss2);
-    }
+    }   //checks for negatives and constants
 
     else if (isalpha(ss2[pos]) || ss2[pos+1] == '[') {
         return parseVar(ss2);
-    }
+    }   //checks for variables or arrays
 
     pos++;
     while (true) {
@@ -272,26 +258,29 @@ NumericExpression* Interpreter::leftrightrec(string ss) {
         else if (ss2[pos] == ')') {
             if (parencheck.top() == '(') {
                 parencheck.pop();
-            }
+            }//matches opening with closing parens
         }
 
         else if (ss2[pos] == '[' || ss2[pos] == ']'){
             if (ss2[pos] == '[') brcount++;
             else if (ss2[pos] == ']') brcount--;
-        }
+        }   //matches opening with closing brackets
 
-        else if (isdigit(ss2[pos]) || isalpha(ss2[pos])) numcount++;  
+        else if (isdigit(ss2[pos]) || isalpha(ss2[pos])) numcount++; 
+        //ensures that at least a var or constant was read
 
         else if ((ss2[pos] == '*' || ss2[pos] == '/' || ss2[pos] == '+' 
         || ss2[pos] == '-') && parencheck.empty() && numcount != 0 && brcount == 0) {
             oper = ss2[pos];
             break;
-        }
+        }//breaks loop when outermost operator is found
+
         pos++;
     }
 
     string lscopy = ss2.substr(1, pos-1);
     string rscopy = ss2.substr(pos+1, ss2.length()-pos-2);
+    //copies left and right numericexpressions
 
     NumericExpression* LeftEx = leftrightrec(lscopy); //recursive call of left
     NumericExpression* RightEx = leftrightrec(rscopy);//and right
@@ -326,7 +315,7 @@ Goto* Interpreter::GotoParse(LineNum line, string jline) {
     size_t linebeg = jline.find_first_of("1234567890-");//find indices
     size_t lineend = jline.find_last_of("1234567890");//of line value
 
-    jlinecopy = jline.substr(linebeg, lineend - linebeg+1);//get just line value
+    jlinecopy = jline.substr(linebeg, lineend - linebeg+1);//get jump line value
 
     stringstream lineconv(jlinecopy);
     lineconv >> jlineint;
@@ -341,8 +330,8 @@ Goto* Interpreter::GotoParse(LineNum line, string jline) {
 GoSub* Interpreter::GosubParse(LineNum line, string jline) {
     string jlinecopy = "";
     int jlineint = 0;
-                                //this function does the same as goto
-                                //just with different format
+                            //this function does the same as goto
+                            //but creates a Gosub command
     size_t linebeg = jline.find_first_of("1234567890-");
     size_t lineend = jline.find_last_of("1234567890");
 
@@ -365,12 +354,12 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
     size_t findthen = ss.find("THEN");
     string linenumb = "";
     unsigned int i = findjline;
-                                //running out of timefor comments
-    while (isdigit(ss[i])) {    //this function parses the bools
-        i--;                    // and makes recursive calls to
-    }                           // NExps
+    
+    while (isdigit(ss[i])) {//finds beginning of jump line
+        i--;                    
+    }                           
 
-    while (i < ss.length()) {
+    while (i < ss.length()) {//copies jump line
         linenumb.push_back(ss[i]);
         i++;
     }
@@ -378,21 +367,24 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
     linenumb = cleanws(linenumb);
     ss.erase(ss.size()-linenumb.size(), linenumb.size());
     ss.erase(findthen, ss.size()-findthen);
-
+    //cleans ws and erases THEN and jump line for easier parsing
 
     string leftarg = "";
     string rightarg = "";
     string rightside = "";
     
-    char boolop = ss[findbool];
+    char boolop = ss[findbool]; //stores operator
 
     leftarg = ss.substr(findfirst, findbool-findfirst);
     rightside = ss.substr(findbool+1, ss.length()-findbool-1 );
+    //gets left and right operations
+
 
     NumericExpression* LeftEx = leftrightrec(leftarg);
     NumericExpression* RightEx = leftrightrec(rightside);
+    //recursive call to parse Numeric Expressions
 
-    if (boolop == '<') {
+    if (boolop == '<') { //checks for evert bool operator
         Less* less = new Less(LeftEx, RightEx);
         return less;
     }
@@ -415,19 +407,19 @@ BooleanExpression* Interpreter::IfParse(LineNum line, string ss) {
 LetVar* Interpreter::LetParse(string ss, LineNum line) {
     
     NumericExpression* parsedvar =  parseVar(ss);
+    //parses variables and values
 
     size_t findVar = ss.find(parsedvar->format());
     string novar = ss.substr(0, ss.size());
 
     novar.erase(findVar, (parsedvar->format()).length());
-
-    //novar = cleanws(novar);
+    //deletes variable part of command
 
     NumericExpression* letvarnumex = leftrightrec(novar);
-
+    //parses value part of command
 
     LetVar* letvarc = new LetVar(parsedvar, letvarnumex, line);
-
+    //creates letvar command
 
     return letvarc;
 
@@ -435,27 +427,29 @@ LetVar* Interpreter::LetParse(string ss, LineNum line) {
 
 LetVarArray* Interpreter::LetParseArr(string ss, LineNum line) {
     int i = 0;
+    int brackcount = 1;
     
     NumericExpression* parsedvar =  parseVar(ss);
+    //parses variable part
 
     string novar = ss.substr(0, ss.size());
 
-
     while(novar[i] != '[')  i++;
+    //finds opening bracket
 
-    int brackcount = 1;
     i++;
 
     while(brackcount > 0) {    //if array is found, iterate
-        if (novar[i] == '[') {
-            brackcount++;
-        }//through its values to store it
-        else if(novar[i] == ']') {          // as numerical expression
+        if (novar[i] == '[') { //through to store index as
+            brackcount++;      //numerical expression
+        }
+        else if(novar[i] == ']') {          
             brackcount--;
         }
         i++;
     }
     novar.erase(0, i);
+    //gets value part of Let
 
     NumericExpression* letvarnumex = leftrightrec(novar);
 
@@ -466,110 +460,120 @@ LetVarArray* Interpreter::LetParseArr(string ss, LineNum line) {
 }
 
 void Interpreter::Interpret(vector<Command*> commandvec, map<int,int> linemap) {
-    bool ended = false;
     map<string,map<int,int> > valmap;
+    //map from var or vararray name to map that holds indices and values
     stack<int> returnstack;
+    //stack that holds return lines
     unsigned int i = 0;
+    //iterator
+    bool ended = false;
+    //bool used to break from while
 
-
-    while(i<commandvec.size()) {
-        //cout << "iteration " << i << endl;
-
-        if (commandvec[i]->getCommName() == "PRINT") {
-            if (commandvec[i]->getVal(valmap) == 2147483646) break;
-            cout << commandvec[i]->getVal(valmap) << endl;
-        }
-
-        else if (commandvec[i]->getCommName() == "LET") {
-            commandvec[i]->getVal(valmap);
-        }
-
-        else if (commandvec[i]->getCommName() == "LETARR") {
-            commandvec[i]->getVal(valmap);  
-        }
-
-        else if (commandvec[i]->getCommName() == "GOTO") {
-            if (linemap.count(commandvec[i]->getJline()) > 0) {
-                i = commandvec[i]->getJline();
-                i = linemap[i];
-                continue;
+    try{ //exception handling for divide by 0 error
+        while(i<commandvec.size()) {
+            //if and else ifs that handle interpreting 
+            //every command's values through recursive calls
+            //and errors
+            if (commandvec[i]->getCommName() == "PRINT") {
+                cout << commandvec[i]->getVal(valmap) << endl;
             }
-            else {
-                cout << "Error in line " << commandvec[i]->getLine() <<": ";
-                cout << "GOTO to non-existent line ";
-                cout << commandvec[i]->getJline() << "." << endl;
-                break;
-            }
-        }
 
-        else if (commandvec[i]->getCommName() == "IF") {
+            else if (commandvec[i]->getCommName() == "LET") {
+                commandvec[i]->getVal(valmap);
+            }
+
+            else if (commandvec[i]->getCommName() == "LETARR") {
+                commandvec[i]->getVal(valmap);  
+            }
+
+            else if (commandvec[i]->getCommName() == "GOTO") {
+                if (linemap.count(commandvec[i]->getJline()) > 0) {
+                    i = commandvec[i]->getJline();
+                    i = linemap[i]; //gets line from line map to
+                    continue;       //allow for different count of
+                                    //line values
+                }
+                else {
+                    cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                    cout << "GOTO to non-existent line ";
+                    cout << commandvec[i]->getJline() << "." << endl;
+                    break;
+                }
+            }
+
+            else if (commandvec[i]->getCommName() == "IF") {
             
-            if (commandvec[i]->getVal(valmap) == 0) {
-                i++;
-                continue;
-            }
+                if (commandvec[i]->getVal(valmap) == 0) {
+                    i++;
+                    continue;
+                }
 
-            else if (linemap.count(commandvec[i]->getJline()) == 0){
-                cout << "Error in line " << commandvec[i]->getLine() <<": ";
-                cout << "IF jump to non-existent line ";
-                cout << commandvec[i]->getJline() << "." << endl;
-                break;
-            }
+                else if (linemap.count(commandvec[i]->getJline()) == 0){
+                    cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                    cout << "IF jump to non-existent line ";
+                    cout << commandvec[i]->getJline() << "." << endl;
+                    break;
+                }
             
-            else if (commandvec[i]->getVal(valmap) == 1 && 
-            linemap.count(commandvec[i]->getJline()) > 0) {
-                i = commandvec[i]->getJline();
-                i = linemap[i];
-                continue;
+                else if (commandvec[i]->getVal(valmap) == 1 && 
+                linemap.count(commandvec[i]->getJline()) > 0) {
+                    i = commandvec[i]->getJline();
+                    i = linemap[i];//same as GOTO
+                    continue;
+                }
+
             }
 
-        }
+            else if (commandvec[i]->getCommName() == "GOSUB") {
+                if (linemap.count(commandvec[i]->getJline()) == 0){
+                    cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                    cout << "GOSUB to non-existent line ";
+                    cout << commandvec[i]->getJline() << "." << endl;
+                    break;
+                }
 
-        else if (commandvec[i]->getCommName() == "GOSUB") {
-            if (linemap.count(commandvec[i]->getJline()) == 0){
-                cout << "Error in line " << commandvec[i]->getLine() <<": ";
-                cout << "GOSUB to non-existent line ";
-                cout << commandvec[i]->getJline() << "." << endl;
+                else {
+                    returnstack.push(commandvec[i]->getLine());
+                    i = commandvec[i]->getJline();
+                    i = linemap[i];//same as GOTO
+                    continue;
+                }
+
+
+
+            }
+
+            else if (commandvec[i]->getCommName() == "RETURN") {
+               if (returnstack.empty()) {
+                    cout << "Error in line " << commandvec[i]->getLine() <<": ";
+                    cout << "No matching GOSUB for RETURN." << endl;
+                    break;
+                }
+                else {
+                    i = returnstack.top();
+                    returnstack.pop();
+                    i = linemap[i];
+                    //gets jline from jline stack and cross checks
+                    //it with line map
+                }
+            }
+
+            else if (commandvec[i]->getCommName() == "END") {
                 break;
             }
 
-            else {
-                returnstack.push(commandvec[i]->getLine());
-                i = commandvec[i]->getJline();
-                i = linemap[i];
-                continue;
-            }
-
-
+            i++;
 
         }
-
-        else if (commandvec[i]->getCommName() == "RETURN") {
-            if (returnstack.empty()) {
-                cout << "Error in line " << commandvec[i]->getLine() <<": ";
-                cout << "No matching GOSUB for RETURN." << endl;
-                break;
-            }
-            else {
-                i = returnstack.top();
-                returnstack.pop();
-                i = linemap[i];
-            }
-        }
-
-        else if (commandvec[i]->getCommName() == "END") {
-            break;
-        }
-
-        i++;
-
     }
-
-    
+    catch (string &except) { //catches divide by 0 error
+        cout << "Error in line " << commandvec[i]->getLine() <<": ";
+        cout << except;
+    }
     
     int j = 0;
     ended = false;
-    while(!ended) {
+    while(!ended) { //deletes all pointers and empties command vector
         Command* tempc = commandvec.back();
         commandvec.pop_back();
         delete tempc;
