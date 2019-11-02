@@ -515,8 +515,7 @@ void Interpreter::Interpret(vector<Command*> commandvec, map<int,int> linemap) {
                     break;
                 }
             
-                else if (commandvec[i]->getVal(valmap) == 1 && 
-                linemap.count(commandvec[i]->getJline()) > 0) {
+                else if (linemap.count(commandvec[i]->getJline()) > 0) {
                     i = commandvec[i]->getJline();
                     i = linemap[i];//same as GOTO
                     continue;
