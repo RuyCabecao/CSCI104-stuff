@@ -21,8 +21,8 @@ string Greater::format() const {
 
 int Greater::getVal(std::map<std::string,std::map<int,int> >& valmap) const {
     if (this->left->getVal(valmap) > this->right->getVal(valmap)) return 1;
-    else return 0;
-}
+    else return 0; //recursive call to compute Bool Expression,
+}                  //if statement is true, return 1, else return 0
 
 Less::Less(NumericExpression* left, NumericExpression* right) : left(left), right(right) {
 
@@ -43,7 +43,8 @@ string Less::format() const {
 
 int Less::getVal(std::map<std::string,std::map<int,int> >& valmap) const {
     if (this->left->getVal(valmap) < this->right->getVal(valmap)) return 1;
-    else return 0;
+    else return 0; //recursive call to compute Bool Expression,
+                   //if statement is true, return 1, else return 0
 }
 
 Equals::Equals(NumericExpression* left, NumericExpression* right) : left(left), right(right) {
@@ -65,5 +66,6 @@ string Equals::format() const {
 
 int Equals::getVal(std::map<std::string,std::map<int,int> >& valmap) const {
     if (this->left->getVal(valmap) == this->right->getVal(valmap)) return 1;
-    else return 0;
+    else return 0;//recursive call to compute Bool Expression,
+                  //if statement is true, return 1, else return 0
 }

@@ -14,7 +14,13 @@ int main(int argc, char* argv[]) {
     }
 
     ifstream input(argv[1]);
+
+    if (input.fail()) {
+        cerr << "File " << argv[1] << " cannot be opened." << endl;
+        return 1;
+    }
+
     Interpreter interpreter(input);
-    //interpreter.write(cout);aa
+
     return 0;
 }

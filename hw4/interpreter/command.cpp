@@ -25,7 +25,7 @@ int Print::getLine() const{
 
 int Print::getVal(map<string,map<int,int> >& valmap) const {
     int value = this->target->getVal(valmap);
-    return value;
+    return value; //recursive call to compute Numeric Expression
 }
 
 string Print::getCommName() const{
@@ -61,12 +61,24 @@ int LetVar::getLine() const{
 
 int LetVar::getVal(map<string,map<int,int> >& valmap) const {
     int value = this->NExp->getVal(valmap);
+    //recursively calculates value var will be set to
+
     map<int,int> tempmap;
+    //initializes a temporary map of index to value
 
     tempmap = valmap[var->getName()];
     tempmap[696969696] = value;
+    //copies what was already in valmap and adds
+    //value at non-array index
+
+    //index is that long number so that  I didn't
+    //have to create an entire new map for 
+    //non-arrays
+
     valmap[var->getName()] = tempmap;
-    
+    //copies tempmap with all correct values back to
+    //valmap
+
     return value;
 }
 
@@ -106,13 +118,19 @@ int LetVarArray::getLine() const{
 int LetVarArray::getVal(map<string,map<int,int> >& valmap) const {
     int access = this->vararr->getIndex(valmap);
     int value = this->NExp->getVal(valmap);
-    string name = this->vararr->getName();
     map<int,int> tempmap;
+    //does same as LetVar, except gets actual index 
+    //from recursive getVal call
 
     tempmap = valmap[vararr->getName()];
     tempmap[access]=value;
+    //copies what was already in valmap and adds
+    //value at given index
+
     valmap[vararr->getName()]=tempmap;
-    
+    //copies tempmap with all correct values back to
+    //valmap
+
     return value;
 }
 
@@ -177,7 +195,7 @@ int IfC::getJline() const{
 
 int IfC::getVal(map<string,map<int,int> >& valmap) const {
     int value = this->cond->getVal(valmap);
-    return value;
+    return value; //recursive call to compute Numeric Expression
 }
 
 string IfC::getCommName() const{

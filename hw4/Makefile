@@ -1,7 +1,7 @@
-all: basic_interpreter
+all: hw4
 
-basic_interpreter: main.cpp interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o
-	g++ -g -Wall -std=c++11 main.cpp interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o -o basic_interpreter
+hw4: main.cpp interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o
+	g++ -g -Wall -std=c++11 main.cpp interpreter/arithmetic.o interpreter/boolean.o interpreter/command.o interpreter/interpreter.o -o hw4
 
 interpreter/arithmetic.o: interpreter/arithmetic.h interpreter/arithmetic.cpp
 	g++ -g -Wall -std=c++11 -c interpreter/arithmetic.cpp -o interpreter/arithmetic.o

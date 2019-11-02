@@ -22,9 +22,10 @@ string Addition::format() const {
 }
 
 int Addition::getVal(map<string,map<int,int> >& valmap) const {
-    int leftex = this->left->getVal(valmap);
+    int leftex = this->left->getVal(valmap); 
     int rightex = this->right->getVal(valmap);
     return leftex + rightex;
+    //recursive call to get value of both sides, then add and return
 }
 
 Subtraction::Subtraction(NumericExpression* left, NumericExpression* right) : left(left), right(right) {
@@ -48,6 +49,7 @@ int Subtraction::getVal(map<string,map<int,int> >& valmap) const {
     int leftex = this->left->getVal(valmap);
     int rightex = this->right->getVal(valmap);
     return leftex - rightex;
+    //recursive call to get value of both sides, subtract, and return
 }
 
 
@@ -72,6 +74,7 @@ int Multiplication::getVal(map<string,map<int,int> >& valmap) const {
     int leftex = this->left->getVal(valmap);
     int rightex = this->right->getVal(valmap);
     return leftex * rightex;
+    //recursive call to get value of both sides, multiply, and return
 }
 
 Division::Division(NumericExpression* left, NumericExpression* right) : left(left), right(right) {
@@ -101,8 +104,9 @@ int Division::getVal(map<string,map<int,int> >& valmap) const {
         ss << "Division by 0: " << this->left->format() << " = " << leftex;
         ss << ", " << this->right->format() << " = "<< rightex << "." << endl;
         std::string except  = ss.str();
-        throw(except);
+        throw(except);//throws exception when dividing by 0
     }
+    //recursive call to get value of both sides, divide, and return
 }
 
 Constant::Constant(string value) : value(value) {
@@ -119,7 +123,7 @@ string Constant::format() const {
 }
 
 int Constant::getVal(map<string,map<int,int> >& valmap) const {
-    return stoi(value);
+    return stoi(value); //returns value as int
 }
 
 VarArray::VarArray(NumericExpression* index, string varArrName) : index(index), varArrName(varArrName) {
@@ -139,9 +143,11 @@ string VarArray::format() const {
 int VarArray::getVal(map<string,map<int,int> >& valmap) const {
     if(valmap.count(varArrName) == 0) {
         valmap[varArrName][index->getVal(valmap)] = 0;
+        //if variable hasn't been called before, value = 0
     }
 
     return valmap[varArrName][index->getVal(valmap)];
+    //if not, just return the value already existent
 }
 string VarArray::getName() const {
     return this->varArrName;
@@ -171,10 +177,11 @@ int VarNum::getVal(map<string,map<int,int> >& valmap) const {
     
     if(valmap.count(varName) == 0) {
         valmap[varName][696969696] = 0;
+        //if variable hasn't been called before, value = 0
     }
 
     return valmap[varName][696969696];
-    
+    //if not, just return the value already existent
 }
 
 string VarNum::getName() const {
@@ -184,4 +191,6 @@ string VarNum::getName() const {
 
 int VarNum::getIndex(map<string,map<int,int> >& valmap) const {
     return 696969696;
+    //hacky way I explained earlier of saving all variables
+    //on same map
 }
