@@ -1,6 +1,0 @@
-1 IF (123 * A) > -125 THEN 2
-2 IF (-1 * (A[X] / 5)) < ((1 - -1) * (2 / 2)) THEN 3
-3 IF A[(X * A[X])] = (A[-5] * B[-5]) THEN 4
-4 IF A[B[C]] = (X * (Y * Z)) THEN 5
-5 PRINT 1
-6 END
