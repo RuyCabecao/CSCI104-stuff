@@ -1,0 +1,27 @@
+1.		
+		    C
+		   / \
+		 H     E
+		/ \   / \
+	   M   I S   T
+	  / \
+	 R   Y
+2. This is a minHeap because the letters closest to 'A', the "smallest," all have children letters farther from 'A' than themselves, meaning their children are larger. Also, the root is the smallest letter.
+
+3.
+		    C
+		   / \
+		 D     E
+		/ \   / \
+	  M    H S   T
+	 / \  /
+	R  Y  I
+
+4.
+		    D
+		   / \
+		 H     E
+		/ \   / \
+	   M   I S   T 
+	  / \ 
+	 R   Y  

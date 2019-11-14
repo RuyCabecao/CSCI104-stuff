@@ -17,7 +17,7 @@ void permutationhelper(std::string in, long unsigned int start, long unsigned in
         in[start] = copys[i]; //swaps values in order to get proper
         in[i] = copys[start]; //recursion calls, moving the letters
                               //around to cover all possibilities
-
+                              
         permutationhelper(in, start+1, length); //calls recursion on next
                                                 //letter of the string
         in[start] = copys[start];
