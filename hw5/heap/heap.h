@@ -45,40 +45,40 @@ template <typename T>
 
        void Swapord (int child, int father);
 
-       void PrintOrder();
-
-       void PrintHeap();
-
    private:
       // whatever you need to naturally store things.
       // You may also add helper functions here.
       
       
       std::vector< std::pair <T,int> > pairvec;
+      //stores "node" as pairs
       std::vector<int> ordervec;
+      //stores where nodes are in heap and their add order
       
       int dval = 2;
       int addcount = 0;
-      int offset = 0;
   };
 
 template <typename T>
 MinHeap<T>::MinHeap(int d) {
   if (d >= 2) 
-    dval = d;
+    dval = d; //sets d value
 }
 
 template <typename T>
 int MinHeap<T>::add (T item, int priority) {
-  
 
   std::pair<T, int> addpair; 
   addpair = std::make_pair (item, priority);
+  //creates Item, int pair
   
   pairvec.push_back(addpair);
   ordervec.push_back(addcount);
+  //adds pair to pairvector and adds
+  //add order to the auxiliary vector
   
   TrickleUp(pairvec.size()-1);
+  //trickles up the added node
   
   addcount++;
   return addcount;
@@ -87,9 +87,11 @@ int MinHeap<T>::add (T item, int priority) {
 template <typename T>
 const T & MinHeap<T>::peek () const {
   if (!(pairvec.empty())) return pairvec[0].first;
+  //returns root
+
   else {
     throw std::runtime_error("Peeked empty heap");
-  }
+  } //error handling
 }
 
 template <typename T>
@@ -97,27 +99,27 @@ void MinHeap<T>::remove () {
   int del1 = 0;
 
   if (pairvec.empty()) {
-    return;
+    return; //can't remove from empty vector
   }
 
   for (unsigned int i = 0; i < ordervec.size(); i++) {
     if (ordervec[i] == 0) {
-      del1 = i;
+      del1 = i; //finds when current root was added
     }
   }
 
-  if (pairvec.size() == 1) {
-    ordervec[del1] = -1;
-    pairvec.pop_back();
+  if (pairvec.size() == 1) { //edge case check.
+    ordervec[del1] = -1; 
+    pairvec.pop_back(); //removes from heap vector.
     return;
   }
 
-  Swap(0, pairvec.size()-1);
-  Swapord(0, pairvec.size()-1);
+  Swap(0, pairvec.size()-1); //swaps last node to root
+  Swapord(0, pairvec.size()-1); //swaps order vector
   
-  ordervec[del1] = -1;
+  ordervec[del1] = -1; //sets deleted node to -1
   
-  pairvec.pop_back();
+  pairvec.pop_back(); //removes from heap vector
   TrickleDown(0);
 
 }
@@ -129,14 +131,18 @@ void MinHeap<T>::update (int nth, int priority) {
   int size = ordervec.size();
   
   if (nth < size && nth > -1 && ordervec[nth] != -1) {
+    //checks if node is valid, i.e. not a deleted node
     temppos = ordervec[nth];
+    //gets index value of nth added
     if (priority < pairvec[temppos].second) {
       pairvec[temppos].second = priority;
       TrickleUp(temppos);
+      //trickles up if priority is less
     }
     else if (priority > pairvec[temppos].second) {
       pairvec[temppos].second = priority;
       TrickleDown(temppos);
+      //trickles down if priority is greater
     }
   }
 }
@@ -144,16 +150,16 @@ void MinHeap<T>::update (int nth, int priority) {
 
 template <typename T>
 bool MinHeap<T>::isEmpty() {
-  return pairvec.empty();
-}
+  return pairvec.empty(); 
+}//if the node vector is empty, then the heap is empty
 
 
 
 template <typename T>
 void MinHeap<T>::TrickleUp(int pos) {
-  if (pairvec.size() == 1)
-    return;
 
+  if (pairvec.size() == 1)
+    return; //nothing to do if only root
 
   if (pos > 0 && pairvec[pos].second < pairvec[(pos-1)/dval].second) {
 
@@ -161,8 +167,10 @@ void MinHeap<T>::TrickleUp(int pos) {
     Swapord(pos, (pos-1)/dval);
     pos = ((pos-1)/dval);
     TrickleUp(pos);
+    //sends the node up if it has lower priority
 
   }
+
   else if (pos > 0 && pairvec[pos].second == pairvec[(pos-1)/dval].second) {
     if (pairvec[pos].first < pairvec[(pos-1)/dval].first) {
          
@@ -170,6 +178,7 @@ void MinHeap<T>::TrickleUp(int pos) {
       Swapord(pos, (pos-1)/dval);
       pos = ((pos-1)/dval);
       TrickleUp(pos);
+      //tiebreaker scenario
 
     }
     else
@@ -185,21 +194,24 @@ void MinHeap<T>::TrickleDown(int pos) {
 
   int minp = pairvec[pos].second;
   int pind = 0;
-  int size = pairvec.size();
+  int size = pairvec.size(); //defines varialbes to not get warnings
 
   if ((dval*pos)+1 < size) {
+    //checks if range is valid
     for (int i = (dval*pos)+1; i < (dval*pos)+dval+1; i++) {
+      //loops through every child
       if (i < size) {
+        //checks if range is valid
         
         if (pairvec[i].second < minp) {
-          minp = pairvec[i].second;
-          pind = i;
+          minp = pairvec[i].second; //sets new minimum
+          pind = i; //sets new minimum index
         }
 
         else if (pairvec[i].second == minp) {
           if (pairvec[i].first < pairvec[pind].first) {
             minp = pairvec[i].second;
-            pind = i;
+            pind = i; //tie breaker scenario
           }
         }
       }
@@ -207,9 +219,9 @@ void MinHeap<T>::TrickleDown(int pos) {
   }
 
   if (minp != pairvec[pos].second) {
-    Swap(pos, pind);
+    Swap(pos, pind); //swaps values downwards
     Swapord(pos, pind);
-    TrickleDown(pind);
+    TrickleDown(pind); //recurisve call to trickle
   }
 
 }
@@ -218,7 +230,8 @@ void MinHeap<T>::TrickleDown(int pos) {
 template <typename T>
 void MinHeap<T>::Swap(int child, int father) {
   std::pair<T, int> temp;
-  
+  //swaps both elements of the pair with a standard swap 
+  //algorithm, nothing too fancy.
   temp.first = pairvec[father].first;
   temp.second = pairvec[father].second;
 
@@ -236,30 +249,15 @@ void MinHeap<T>::Swapord(int child, int father) {
   int pi = 0;
   
   for (unsigned int i = 0; i < ordervec.size(); i++) {
-    if (ordervec[i] == child) ci = i;
+    if (ordervec[i] == child) ci = i; 
+    //finds index of child node in order vector
     else if (ordervec[i] == father) pi = i;
+    //finds index of parent node in order vector
   }
   temp = ordervec[pi];
 
   ordervec[pi] = ordervec[ci];
 
   ordervec[ci] = temp;
-}
-
-
-template <typename T>
-void MinHeap<T>::PrintOrder() {
-  for (unsigned int i = 0; i < ordervec.size(); i++) {
-    std::cout << ordervec[i] << " ";
-  }
-  std::cout << std::endl;
-}
-
-
-template <typename T>
-void MinHeap<T>::PrintHeap() {
-  for (unsigned int i = 0; i < pairvec.size(); i++) {
-    std::cout << pairvec[i].first << " ";
-  }
-  std::cout << std::endl;
+  //swaps values with standard swap algorithm
 }

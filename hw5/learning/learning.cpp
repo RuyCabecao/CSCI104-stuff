@@ -4,11 +4,9 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 void subsets(double work[], double learn[], double workload, int numclasses, 
     int start, double worksum,double learnsum, 
-    vector <double> &wvec, vector <double> &lvec) {
+    std::vector <double> &wvec, std::vector <double> &lvec) {
 
 //This implementation uses a recursive subset sum to find all possible learn 
 //and work combinations.
@@ -36,8 +34,8 @@ void subsets(double work[], double learn[], double workload, int numclasses,
 void subsetmap(double work[], double learn[], double workload, 
 int numclasses, int start, double worksum, double learnsum) {
     
-    vector <double> lvec; //defines vectors
-    vector <double> wvec;
+    std::vector <double> lvec; //defines vectors
+    std::vector <double> wvec;
     double max = 0; //double that will store maximum possible learn
    
     subsets(work, learn, workload, numclasses, 0, 0, 0, wvec, lvec);//fills vectors
@@ -48,7 +46,7 @@ int numclasses, int start, double worksum, double learnsum) {
         }   
     }
     
-    cout << max << endl; //prints maximum learn
+    std::cout << max << std::endl; //prints maximum learn
 
 }
 
@@ -57,42 +55,42 @@ int numclasses, int start, double worksum, double learnsum) {
 int main(int argc, char* argv[]) { 
     
     if (argc < 2) {
-        cerr << "Error: please provide an input file." << endl;
+        std::cerr << "Error: please provide an input file." << std::endl;
         return 1; //checks for # of arguments
     }
 
     else if (argc > 2) {
-        cerr << "Error: too many arguments." << endl;
+        std::cerr << "Error: too many arguments." << std::endl;
         return 1; //checks for # of arguments
     }
 
-    ifstream input(argv[1]);
+    std::ifstream input(argv[1]);
 
     if (input.fail()) {
-        cerr << "Error: file " << argv[1] << " cannot be opened." << endl;
+        std::cerr << "Error: file " << argv[1] << " cannot be opened." << std::endl;
         return 1; //checks if file exists;
     }
 
-    string line = "";
+    std::string line = "";
     int numclasses = 0;
     double workload = 0;
     int counter = 0;
     //defines some vars
 
     getline(input, line);
-    stringstream ss(line);
+    std::stringstream ss(line);
     ss >> numclasses >> workload;
     //gets number of classes and max workload
 
-    string classes[numclasses];
+    std::string classes[numclasses];
     double learn[numclasses];
     double workloadarr[numclasses];
-    //creates arrays to store all values
+    //creates arrays to store values
 
 
     while(getline(input, line)) {
 
-        stringstream ss2(line);
+        std::stringstream ss2(line);
         ss2 >> classes[counter] >> workloadarr[counter] >> learn[counter];
         counter++;
         //stores all values in arrays

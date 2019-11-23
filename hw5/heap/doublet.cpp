@@ -27,128 +27,89 @@ void makeUpper(string& word) {//makes all words completely uppercase
 }
 
 void Search(set <string> wordset, string startword, string endword){
-    MinHeap<string> heap(2);
+    MinHeap<string> heap(2); //initalizes a binary heap
 
-    int fval = 0;
-    int hval = 0;
+    int fval = 0; //defines temp variables, variables needed for
+    int hval = 0; //calculations, and strings to store words.
     int gval = 0;
     int pri = 0;
     string currword = "";
     string tempword = "";
     int temph = 0;
 
-    makeUpper(startword);
-    makeUpper(endword);
+    makeUpper(startword); //makes starting word and target
+    makeUpper(endword);   //upper case
 
     map<string,int> distmap;
     set<string>::iterator iter;
 
-    iter = wordset.find(startword);
-    if (iter == wordset.end()) {
+    iter = wordset.find(startword); //checks if start word
+    if (iter == wordset.end()) {    //was in file
         cout << "Start word not in dictionary" << endl;
         return;
     }
+
     currword = *iter;
 
-    hval = geth(startword, endword);
-    //cout << startword << " is " << hval << " letters away from " << endword << endl;
-
-    fval = gval + hval;
+    hval = geth(startword, endword); //calculates h, f, and g
+    fval = gval + hval;              //values and priority
     pri = fval * (currword.length() + 1) + hval;
 
-   /* cout << "f is: " << fval << endl;
-    cout << "g is: " << gval << endl;
-    cout << "h is: " << hval << endl;
-    cout << "word length + 1 is: " << currword.length()+1 << endl;
-    cout << "priority is: " << pri << endl;*/
-
-    heap.add(currword, pri);
+    heap.add(currword, pri); //adds starting node do heap
     distmap[currword] = gval;
-    //gval++;
     
-    int tcount = 0;
-    int found = 0;
+    int tcount = 0; //defines int to count transformations.
+    int found = 0; //int to break if last word was found
 
-   // heap.PrintHeap();
-
+    //A* implementation
     while (!heap.isEmpty()) {
         
         currword = heap.peek();
         heap.remove();
-        cout << "distance from beggining: " << distmap[currword];
-        cout << " || distance from end: " << geth(currword, endword);
-        cout << " || fval: " << distmap[currword]+geth(currword, endword) << endl;
-        cout << "word at top was: " << currword << endl;
+
         if (currword==endword) {
             found = 1;
             break;
         }
 
         for (unsigned int i = 0; i < currword.length(); i++) {
+            //for loop to run through letters of the word
             tempword = currword;
+
             for (char j = 'A'; j  < 'Z'+1; j++) {
+            //checks for possible variations of the current word
                 tempword[i] = j;
+
                 if ((distmap.find(tempword) == distmap.end() 
                 || distmap[tempword] > distmap[currword] + geth(currword, tempword))
                 && wordset.find(tempword) != wordset.end()) {
-                    cout << "checking: " << tempword << endl;
+                //checks if word has been added to the map or if a shorter path to the
+                //word has been found and if the word is part of the dictionary.
 
-                    distmap[tempword] = distmap[currword]+1;
-                    temph = geth(currword, tempword);
+                    distmap[tempword] = distmap[currword]+1; //sets g-value for word
+                    temph = geth(currword, tempword); //gets h value for next if check 
 
                     if (temph == 1) {
-                    
-                        hval = geth(tempword, endword);
-                        fval = distmap[tempword] + hval;
-                        pri = fval * (currword.length() + 1) + hval;
-                        heap.add(tempword, pri);
-                        cout << "Added " << tempword <<" with prio: " << pri << endl;
-                    }
-                    //else if (temph + ){
+                    //checks if new word is 1 step away from original word
+                        hval = geth(tempword, endword); //gets hval for new word
+                        fval = distmap[tempword] + hval; //gets fval
+                        pri = fval * (currword.length() + 1) + hval; //gets priority
+                        heap.add(tempword, pri); //adds to heap
 
-                    //}
+                    }
                 }
             }
         }
-        tcount++;
-        heap.PrintHeap();
-        cout <<  tcount << endl;
-        cout << endl;
+        tcount++; //increments transformation count
     }
 
     if (found == 1) {
         cout << distmap[currword] << endl << tcount << endl; 
     }
 
-    if (found == 0) {
+    else if (found == 0) {
         cout << "No transformation" << endl << tcount << endl;
     }
-
-    //
-
-
-   /* int d[n]; //distances from the start node u
-    int p[n]; //predecessors
-    int c[n][n]; //edge costs
-    void Dijkstra (int u) {
-        PriorityQueue<int> pq(); //How should we implement this?
-        d[u] = 0;
-        pq.add(u, d[u]);
-        while(!pq.isEmpty()) {
-            int v = pq.peek();
-            pq.remove();
-            for all nodes outgoing edges (v,w) from v {
-                if (w hasn’t been visited || d[v] + c[v][w] < d[w]) {
-                d[w] = d[v] + c[v][w];
-                p[w] = v;
-                    if (this is w’s first visit) {
-                        pq.add(w, d[w]);
-                    }
-                    else pq.update(w, d[w]);
-                }
-            }
-        }       
-    }*/
 }
 
 int main(int argc, char* argv[]) {
@@ -180,16 +141,18 @@ int main(int argc, char* argv[]) {
     stringstream ss(line);
     ss >> numwords;
 
-    while(getline(input, line)) {
+    while(getline(input, line)) { //gets words from file
         stringstream ss(line);
         ss >> tempword;
-        if (tempword.length() != startword.length()) continue;
+
+        if (tempword.length() != startword.length()) continue; 
+        //inserts words in set if they are the right length
         makeUpper(tempword);
         wordset.insert(tempword);
-        //cout << tempword << endl;
     }
 
     Search(wordset, startword, endword);
+    //calls A*
 
     return 0;
 }
