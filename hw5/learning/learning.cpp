@@ -6,7 +6,14 @@
 
 using namespace std;
 
-void subsets(double work[], double learn[], double workload, int numclasses, int start, double worksum, double learnsum, vector <double> &wvec, vector <double> &lvec) {
+void subsets(double work[], double learn[], double workload, int numclasses, 
+    int start, double worksum,double learnsum, 
+    vector <double> &wvec, vector <double> &lvec) {
+
+//This implementation uses a recursive subset sum to find all possible learn 
+//and work combinations.
+//This helper function feeds into two vectors that store respecitve learn and
+//work sums in the same indices
 
     if (start > numclasses) {
         lvec.push_back(learnsum); //pushes amount learned into vector
@@ -14,33 +21,34 @@ void subsets(double work[], double learn[], double workload, int numclasses, int
         return;
     }
     
-    //This implementation uses a recursive subset sum to find all possible learn and work combinations.
-    //This helper function feeds into two vectors that store respecitve learn and work sums in the same
-    //indices.
+    subsets(work, learn, workload, numclasses, start+1,  
+    worksum+work[start], learnsum+learn[start], wvec, lvec);
+    //recursive call incrementing worksum and learnsum
 
-
-    subsets(work, learn, workload, numclasses, start+1, worksum+work[start], learnsum+learn[start], wvec, lvec);
-    subsets(work, learn, workload, numclasses, start+1, worksum, learnsum, wvec, lvec);
+    subsets(work, learn, workload, numclasses, start+1,
+    worksum, learnsum, wvec, lvec);
+    //recursive call not incrementing 
 
 }
 
 /*###################################################################*/
 
-void subsetmap(double work[], double learn[], double workload, int numclasses, int start, double worksum, double learnsum) {
+void subsetmap(double work[], double learn[], double workload, 
+int numclasses, int start, double worksum, double learnsum) {
     
     vector <double> lvec; //defines vectors
     vector <double> wvec;
-    double ind = 0;
+    double max = 0; //double that will store maximum possible learn
    
-    subsets(work, learn, workload, numclasses, 0, 0, 0, wvec, lvec); //populates vectors
+    subsets(work, learn, workload, numclasses, 0, 0, 0, wvec, lvec);//fills vectors
     
     for (unsigned int i = 0; i < wvec.size(); i++) {
-        if (wvec[i] <= workload && lvec[i] > ind){
-            ind = lvec[i]; //finds maximum learn that doesn't exceed workload
+        if (wvec[i] <= workload && lvec[i] > max){
+            max = lvec[i]; //finds maximum learn that doesn't exceed workload
         }   
     }
     
-    cout << ind << endl; //prints maximum learn
+    cout << max << endl; //prints maximum learn
 
 }
 
