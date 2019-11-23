@@ -77,7 +77,8 @@ int MinHeap<T>::add (T item, int priority) {
   //adds pair to pairvector and adds
   //add order to the auxiliary vector
   
-  TrickleUp(pairvec.size()-1);
+  int size = pairvec.size()-1;
+  TrickleUp(size);
   //trickles up the added node
   
   addcount++;
@@ -114,8 +115,9 @@ void MinHeap<T>::remove () {
     return;
   }
 
-  Swap(0, pairvec.size()-1); //swaps last node to root
-  Swapord(0, pairvec.size()-1); //swaps order vector
+  int size = pairvec.size()-1;
+  Swap(0, size); //swaps last node to root
+  Swapord(0, size); //swaps order vector
   
   ordervec[del1] = -1; //sets deleted node to -1
   
@@ -194,13 +196,13 @@ void MinHeap<T>::TrickleDown(int pos) {
 
   int minp = pairvec[pos].second;
   int pind = 0;
-  int size = pairvec.size(); //defines varialbes to not get warnings
+  int size = pairvec.size()-1; //defines varialbes to not get warnings
 
-  if ((dval*pos)+1 < size) {
+  if ((dval*pos)+1 < size+1) {
     //checks if range is valid
     for (int i = (dval*pos)+1; i < (dval*pos)+dval+1; i++) {
       //loops through every child
-      if (i < size) {
+      if (i < size+1) {
         //checks if range is valid
         
         if (pairvec[i].second < minp) {
