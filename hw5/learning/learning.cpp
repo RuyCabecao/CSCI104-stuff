@@ -13,7 +13,7 @@ void subsets(double work[], double learn[], double workload, int numclasses,
 //This helper function feeds into two vectors that store respecitve learn and
 //work sums in the same indices
 
-    if (start > numclasses) {
+    if (start == numclasses) {
         lvec.push_back(learnsum); //pushes amount learned into vector
         wvec.push_back(worksum); //pushes amount of work into vector
         return;
@@ -98,6 +98,6 @@ int main(int argc, char* argv[]) {
 
     subsetmap(workloadarr, learn, workload, numclasses, 0, 0, 0);
     //calls recursion
-
+    
     return 0;
 }
