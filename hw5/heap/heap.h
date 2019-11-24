@@ -77,7 +77,7 @@ int MinHeap<T>::add (T item, int priority) {
   //adds pair to pairvector and adds
   //add order to the auxiliary vector
   
-  TrickleUp(pairvec.size()-1);
+  TrickleUp((unsigned int)pairvec.size()-1);
   //trickles up the added node
   
   addcount++;
@@ -114,8 +114,8 @@ void MinHeap<T>::remove () {
     return;
   }
 
-  Swap(0, pairvec.size()-1); //swaps last node to root
-  Swapord(0, pairvec.size()-1); //swaps order vector
+  Swap(0, (unsigned int)pairvec.size()-1); //swaps last node to root
+  Swapord(0, (unsigned int)pairvec.size()-1); //swaps order vector
   
   ordervec[del1] = -1; //sets deleted node to -1
   
