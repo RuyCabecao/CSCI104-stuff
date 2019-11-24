@@ -37,13 +37,13 @@ template <typename T>
 
 
 
-       void TrickleUp (int pos);
+       void TrickleUp (unsigned int pos);
 
-       void TrickleDown (int pos);
+       void TrickleDown (unsigned int pos);
 
-       void Swap (int child, int father);
+       void Swap (unsigned int child, unsigned int father);
 
-       void Swapord (int child, int father);
+       void Swapord (unsigned int child, unsigned int father);
 
    private:
       // whatever you need to naturally store things.
@@ -158,7 +158,7 @@ bool MinHeap<T>::isEmpty() {
 
 
 template <typename T>
-void MinHeap<T>::TrickleUp(int pos) {
+void MinHeap<T>::TrickleUp(unsigned int pos) {
 
   if (pairvec.size() == 1)
     return; //nothing to do if only root
@@ -192,17 +192,17 @@ void MinHeap<T>::TrickleUp(int pos) {
 
 
 template <typename T>
-void MinHeap<T>::TrickleDown(int pos) {
+void MinHeap<T>::TrickleDown(unsigned int pos) {
 
   int minp = pairvec[pos].second;
   int pind = 0;
-  int size = pairvec.size()-1; //defines varialbes to not get warnings
+  unsigned int size = pairvec.size(); //defines varialbes to not get warnings
 
-  if ((dval*pos)+1 < size+1) {
+  if ((dval*pos)+1 < size) {
     //checks if range is valid
-    for (int i = (dval*pos)+1; i < (dval*pos)+dval+1; i++) {
+    for (unsigned int i = (dval*pos)+1; i < (dval*pos)+dval+1; i++) {
       //loops through every child
-      if (i < size+1) {
+      if (i < size) {
         //checks if range is valid
         
         if (pairvec[i].second < minp) {
@@ -230,7 +230,7 @@ void MinHeap<T>::TrickleDown(int pos) {
 
 
 template <typename T>
-void MinHeap<T>::Swap(int child, int father) {
+void MinHeap<T>::Swap(unsigned int child, unsigned int father) {
   std::pair<T, int> temp;
   //swaps both elements of the pair with a standard swap 
   //algorithm, nothing too fancy.
@@ -245,15 +245,15 @@ void MinHeap<T>::Swap(int child, int father) {
 }
 
 template <typename T>
-void MinHeap<T>::Swapord(int child, int father) {
+void MinHeap<T>::Swapord(unsigned int child, unsigned int father) {
   int temp = 0;
   int ci = 0;
   int pi = 0;
   
   for (unsigned int i = 0; i < ordervec.size(); i++) {
-    if (ordervec[i] == child) ci = i; 
+    if ((unsigned int)ordervec[i] == child) ci = i; 
     //finds index of child node in order vector
-    else if (ordervec[i] == father) pi = i;
+    else if ((unsigned int)ordervec[i] == father) pi = i;
     //finds index of parent node in order vector
   }
   temp = ordervec[pi];
