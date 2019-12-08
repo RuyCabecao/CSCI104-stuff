@@ -128,7 +128,7 @@ private:
 	   into smaller pieces. You should not need additional data members. */
 	int bettergetheight(AVLNode<Key, Value>* node);
 	int calcbf(AVLNode<Key, Value>* node);
-	AVLNode<Key, Value>* insertHelper(AVLNode<Key, Value>* root, const std::pair<Key, Value>& keyValuePair);
+	AVLNode<Key, Value>* insertHelper(AVLNode<Key, Value>* root, const std::pair<Key, Value>& keyValuePair, AVLNode<Key, Value>* parent);
 	void printheights(AVLNode<Key, Value>* root);
 	AVLNode<Key, Value>* leftrotate(AVLNode<Key, Value>* node);
 	AVLNode<Key, Value>* rightrotate(AVLNode<Key, Value>* node);
@@ -154,18 +154,18 @@ template<typename Key, typename Value>
 void AVLTree<Key, Value>::insert(const std::pair<Key, Value>& keyValuePair)
 {
 
-	this->mRoot = insertHelper(static_cast<AVLNode<Key,Value>*>(this->mRoot), keyValuePair);
-/*	std::cout << "====================" << std::endl;
+	this->mRoot = insertHelper(static_cast<AVLNode<Key,Value>*>(this->mRoot), keyValuePair, NULL);
+	std::cout << "====================" << std::endl;
 	printheights(static_cast<AVLNode<Key,Value>*>(this->mRoot));
-	std::cout << "====================" << std::endl;*/
+	std::cout << "====================" << std::endl;
 
 }
 
 template<typename Key, typename Value>
-AVLNode<Key,Value>* AVLTree<Key, Value>::insertHelper(AVLNode<Key, Value>* root, const std::pair<Key, Value>& keyValuePair) {
-
+AVLNode<Key,Value>* AVLTree<Key, Value>::insertHelper(AVLNode<Key, Value>* root, const std::pair<Key, Value>& keyValuePair, AVLNode<Key, Value>* parent) {
+	
 	if (root == NULL) {
-		AVLNode<Key,Value>* nnode = new AVLNode<Key, Value>(keyValuePair.first, keyValuePair.second, NULL);
+		AVLNode<Key,Value>* nnode = new AVLNode<Key, Value>(keyValuePair.first, keyValuePair.second, parent);
 		nnode->setHeight(nnode->getHeight()+1);
 		//std::cout << "inserting " << nnode->getKey() <<std::endl;
 		return nnode;		
@@ -174,13 +174,13 @@ AVLNode<Key,Value>* AVLTree<Key, Value>::insertHelper(AVLNode<Key, Value>* root,
 	if (keyValuePair.first > root->getKey()) {
 		//std::cout << " if1" << std::endl;
 
-		root->setRight(static_cast<AVLNode<Key,Value>*>(insertHelper(root->getRight(), keyValuePair))); 
+		root->setRight(static_cast<AVLNode<Key,Value>*>(insertHelper(root->getRight(), keyValuePair, root))); 
 	}
 
 	else if (keyValuePair.first < root->getKey()) {
 		//std::cout << " if2" << std::endl;
 
-		root->setLeft(static_cast<AVLNode<Key,Value>*>(insertHelper(root->getLeft(), keyValuePair))); 
+		root->setLeft(static_cast<AVLNode<Key,Value>*>(insertHelper(root->getLeft(), keyValuePair, root))); 
 	}
 
 	else {
@@ -268,55 +268,117 @@ void AVLTree<Key, Value>::remove(const Key& key)
 template<typename Key, typename Value>
 AVLNode<Key, Value>* AVLTree<Key, Value>::removeHelper(AVLNode<Key, Value>* root, const Key& key)
 {
-
+ 
+	std::cout << "in here" << std::endl;
 	// TODO
-	if (root == NULL)
+	if (root == NULL) {
+		std::cout << "root is null" << std::endl;
 		return root;
+	}
 
-	if (key < root->getKey())
+
+	if (key < root->getKey()) {
+		std::cout << "in if1" << std::endl;
 		root->setLeft(removeHelper(root->getLeft(), key));
+		
+	}
 
-	else if (key > root->getKey())
-		root->setLeft(removeHelper(root->getRight(), key));
+	else if (key > root->getKey()) {
+		std::cout << "in if2" << std::endl;
+		root->setRight(removeHelper(root->getRight(), key));
+		std::cout << "back" <<std::endl;
+
+	}
 
 	else {
+		std::cout << "found node ";
+		std::cout << root->getKey() <<std::endl;
+
 		AVLNode <Key, Value>* tnode = NULL;
-		if (!root->getRight() || !root->getLeft()) {
-			if (root->getLeft()) 
+
+		std::cout << root->getRight() << " and " << root->getLeft() << std::endl;
+		if (!root->getRight() || !root->getLeft()) { //one or 0 child
+			std::cout << "in else if1" << std::endl;
+
+			if (root->getLeft()) {
+				std::cout << "in else if1 if1" << std::endl;
 				tnode = root->getLeft();
-			else if (root->getRight())
-				tnode = root->getRight();
+				std::cout << tnode->getKey() << std::endl; 
 
-			if (!tnode) {
-				tnode = root;
-				root = NULL;
 			}
-			else root = tnode;
+			else if (root->getRight()) {
+				std::cout << "in else if1 if2" << std::endl;
+				tnode = root->getRight();
+				std::cout << tnode->getKey() << std::endl; 
 
-			delete tnode;
+			}
+
+			//std::cout << tnode->getParent()->getKey() << std::endl;
+			//std::cout << root->getParent()->getKey() <<std::endl; 
+			if (!tnode) {
+				std::cout << "!tnode" << std::endl; 
+				swap(root,NULL);
+			}
+			else {
+				std::cout <<"swapping" <<std::endl;
+				swap(root, tnode);
+			}
+
+			std::cout << "past !tnode" << std::endl;
+			std::cout << "====================" << std::endl;
+			printheights(static_cast<AVLNode<Key,Value>*>(this->mRoot));
+			std::cout << "====================" << std::endl;
+
+			//std::cout << tnode->getKey() << std::endl;
+			//std::cout << root->getKey() <<std::endl; 
+
+			delete root;
+			root = tnode;
+			
 		}
-
-		else {
+		else { //2 children 
+			std::cout << "in swap else" << std::endl;
+			
 			AVLNode <Key, Value>* tnode = getMinChild(root->getRight());
 
-			swap(root, tnode);
 
-			root->setRight(removeHelper(root->getRight(), tnode->getKey()));
+
+			swap(root, tnode);
+			std::cout << "past swap" << std::endl;
+			
+
+			tnode->setRight(removeHelper(tnode->getRight(), tnode->getKey()));
 		}
 	}
 
-	if(!root) return root;
+	std::cout << root << std::endl;
+	if(!root) {
+		return NULL;
+	} 
+	std::cout << root->getKey() << std::endl;
 
+
+			
+			printheights(static_cast<AVLNode<Key,Value>*>(this->mRoot));
+
+			std::cout << "past return null" << std::endl;
+		//std::cout << root->getLeft() << std::endl; 
+		//std::cout << root->getRight() << std::endl; 
 
 	if (bettergetheight(root->getLeft()) > bettergetheight(root->getRight()))
 		root->setHeight(1+bettergetheight(root->getLeft()));
 	else
 		root->setHeight(1+bettergetheight(root->getRight()));
 
+			std::cout << "past heights" << std::endl;
+	
+
 	int bf = calcbf(root);
+	int bf2 = calcbf(root->getLeft());
+	std::cout << bf << " " << bf2 <<std::endl;
 
 		//right right
-	if (root->getRight() != NULL) {
+	if (root->getRight()) {
 		if (0 >= calcbf(root->getRight()) && bf < -1) {
 			std::cout << root->getKey() << "procL" << std::endl;
 			return leftrotate(root);
@@ -324,15 +386,15 @@ AVLNode<Key, Value>* AVLTree<Key, Value>::removeHelper(AVLNode<Key, Value>* root
 	}
 
 	//left left
-	if (root->getLeft() != NULL) {
-		if (0 <= calcbf(root->getRight()) && bf > 1) {
+	if (root->getLeft()) {
+		if (0 <= calcbf(root->getLeft()) && bf > 1) {
 			//std::cout << root->getKey() << "procR" << std::endl;
 			return rightrotate(root);
 		}
 	}
 
 	//right left
-	if (root->getRight() != NULL) {
+	if (root->getRight()) {
 		if (0 < calcbf(root->getRight()) && bf < -1) {
 			//std::cout << root->getKey() << "procRL" << std::endl;
 			root->setRight(rightrotate(root->getRight()));
@@ -341,8 +403,8 @@ AVLNode<Key, Value>* AVLTree<Key, Value>::removeHelper(AVLNode<Key, Value>* root
 	}
 
 	//left right
-	if (root->getLeft() != NULL) {
-		if (0 > calcbf(root->getRight()) && bf > 1) {
+	if (root->getLeft()) {
+		if (0 > calcbf(root->getLeft()) && bf > 1) {
 			//std::cout << root->getKey() << "procLR" << std::endl;
 			root->setLeft(leftrotate(root->getLeft()));
 			return rightrotate(root);
@@ -371,6 +433,8 @@ AVLNode<Key, Value>*  AVLTree<Key, Value>::leftrotate(AVLNode<Key, Value>* a) {
 		b->setLeft(a);
 		a->setRight(T2);
 		a->setParent(b);
+		if (T2)
+			T2->setParent(a);
 
 	}
 
@@ -382,6 +446,8 @@ AVLNode<Key, Value>*  AVLTree<Key, Value>::leftrotate(AVLNode<Key, Value>* a) {
 		b->setLeft(a);
 		a->setRight(T2);
 		a->setParent(b);
+		if (T2)
+			T2->setParent(a);
 		printheights(b);
 	}
 
@@ -392,6 +458,8 @@ AVLNode<Key, Value>*  AVLTree<Key, Value>::leftrotate(AVLNode<Key, Value>* a) {
 		b->setLeft(a);
 		a->setRight(T2);
 		a->setParent(b);
+		if (T2)
+			T2->setParent(a);
 	}
 
 	if (bettergetheight(a->getLeft()) > bettergetheight(a->getRight()))
@@ -432,6 +500,8 @@ AVLNode<Key, Value>*  AVLTree<Key, Value>::rightrotate(AVLNode<Key, Value>* a) {
 		b->setRight(a);
 		a->setLeft(T2);
 		a->setParent(b);
+		if (T2)
+			T2->setParent(a);
 
 	}
 
@@ -443,6 +513,8 @@ AVLNode<Key, Value>*  AVLTree<Key, Value>::rightrotate(AVLNode<Key, Value>* a) {
 		b->setRight(a);
 		a->setLeft(T2);
 		a->setParent(b);
+		if (T2)
+			T2->setParent(a);
 		printheights(b);
 	}
 
@@ -452,6 +524,8 @@ AVLNode<Key, Value>*  AVLTree<Key, Value>::rightrotate(AVLNode<Key, Value>* a) {
 		a->getParent()->setRight(b);
 		b->setRight(a);
 		a->setLeft(T2);
+		if (T2)
+			T2->setParent(a);
 		a->setParent(b);
 	}
 
@@ -497,7 +571,10 @@ template<typename Key, typename Value>
 void AVLTree<Key, Value>::printheights(AVLNode<Key, Value>* root) {
 	if (root != NULL) {
 		//int bf = calcbf(root);
-		std::cout << root->getKey() << " height " << root->getHeight() << std::endl; 
+		if (root->getParent() != NULL)
+			std::cout << root->getKey() << " height " << root->getHeight() << " parent " << root->getParent()->getKey() << std::endl; 
+		else std::cout << root->getKey() <<" height " << root->getHeight() << " parent " << 0 << std::endl; 
+
 		printheights(root->getLeft());
 		printheights(root->getRight());
 	}
@@ -518,28 +595,40 @@ AVLNode<Key, Value>* AVLTree<Key, Value>::getMinChild(AVLNode<Key, Value>* paren
 template<typename Key, typename Value>
 void AVLTree<Key, Value>::swap(AVLNode<Key, Value>* onode, AVLNode<Key, Value>* succ) {
 
+	printheights(onode);
+
 	if (onode == succ) {
 		return;
 	}
+	std::cout << "first check" << std::endl;
 
-	bool ohasleft = false;
-	bool ohasright = false;
+
 	bool oisroot = false;
 	bool oisleft = false;
 	bool oisright = false;
 	
 	if (onode->getParent() == NULL)
 		oisroot = true;
-	if (onode->getLeft() != NULL)
-		ohasleft = true;
-	if (onode->getRight() != NULL)
-		ohasright = true;
 
 	if(!oisroot) {
 		if (onode->getParent()->getRight() == onode) 
 			oisright = true;
 		else if (onode->getParent()->getLeft() == onode)
 			oisleft = true;
+	}
+
+	if (succ==NULL) {
+		if (oisright) {
+			onode->getParent()->setRight(NULL);
+		}
+		if (oisleft) {
+			onode->getParent()->setLeft(NULL);
+		}
+		onode->setRight(NULL);
+		onode->setLeft(NULL);
+		onode->setParent(NULL);
+		onode = NULL;
+		return;
 	}
 
 	if (succ->getParent()->getRight() == succ)
@@ -550,10 +639,13 @@ void AVLTree<Key, Value>::swap(AVLNode<Key, Value>* onode, AVLNode<Key, Value>* 
 	succ->setParent(onode->getParent());
 	succ->setLeft(onode->getLeft());
 	succ->setRight(onode->getRight());
+
+	printheights(onode);
 	
-	if (ohasleft)
+	if (onode->getLeft())
 		onode->getLeft()->setParent(succ);
-	if (ohasright)
+	std::cout << onode->getRight() << std::endl;
+	if (onode->getRight())
 		onode->getRight()->setParent(succ);
 	if (oisright)
 		onode->getParent()->setRight(succ);
@@ -561,8 +653,14 @@ void AVLTree<Key, Value>::swap(AVLNode<Key, Value>* onode, AVLNode<Key, Value>* 
 		onode->getParent()->setLeft(succ);
 	if (oisroot)
 		this->mRoot = succ;
-	delete onode;
 
+	succ->setHeight(onode->getHeight());
+
+	onode = NULL;
+
+	std::cout << "//////////////" << std::endl;
+	printheights(static_cast<AVLNode<Key,Value>*>(this->mRoot));
+	std::cout << "//////////////" << std::endl;
 }
 
 
