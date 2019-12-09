@@ -12,8 +12,8 @@ int main() {
     pairins2.first = 6;
     pairins2.second = 6;
     pair<double, double> pairins3;
-    pairins3.first = 10;
-    pairins3.second = 10;
+    pairins3.first = 11;
+    pairins3.second = 11;
     pair<double, double> pairins4;
     pairins4.first = 5;
     pairins4.second = 5;
@@ -21,17 +21,17 @@ int main() {
     pairins5.first = 8;
     pairins5.second = 8;
     pair<double, double> pairins6;
-    pairins6.first = 11;
-    pairins6.second = 11;
+    pairins6.first = 10;
+    pairins6.second = 10;
     pair<double, double> pairins7;
-    pairins7.first = 7;
-    pairins7.second = 7;
+    pairins7.first = 12;
+    pairins7.second = 12;
     pair<double, double> pairins8;
-    pairins8.first = 8;
-    pairins8.second = 8;
+    pairins8.first = 7;
+    pairins8.second = 7;
     pair<double, double> pairins9;
-    pairins9.first = 3;
-    pairins9.second = 3;
+    pairins9.first = 13;
+    pairins9.second = 13;
     avl.print();
 
 
@@ -43,20 +43,32 @@ int main() {
     avl.print();
     avl.insert(pairins4);
     avl.print();
-    avl.insert(pairins5);
-    avl.print();
+    //avl.insert(pairins5);
+    //avl.print();
     avl.insert(pairins6);
     avl.print();
     avl.insert(pairins7);
     avl.print();
+    //avl.insert(pairins8);
+    //avl.print();
+    //avl.insert(pairins9);
+    //avl.print();
+    avl.remove(6);
+    avl.print();
+    //avl.remove(7);
+    //avl.print();
+    avl.remove(5);
+    avl.print();
+    avl.remove(9);
+    avl.print();
     avl.remove(11);
     avl.print();
-    //avl.remove(4);
-    //avl.print();
-    /*avl.insert(pairins8);
+    avl.remove(99);
+    avl.remove(10);
     avl.print();
-    avl.insert(pairins9);
-    avl.print();*/
+    avl.remove(12);
+    avl.print();
+    avl.clear();
 
 
     avl.print();

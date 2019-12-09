@@ -204,8 +204,6 @@ public:
 	~BinarySearchTree();
 
 	virtual void insert(const std::pair<Key, Value>& keyValuePair);
-	Node<Key, Value>* insertHelp(Node<Key, Value>* parent, Node<Key, Value>* root, Node<Key, Value>* insnode, const std::pair<Key, Value>& keyValuePair);
-
 
 	void clear();
 	void print() const;
@@ -386,7 +384,6 @@ BinarySearchTree<Key, Value>::~BinarySearchTree()
 {
 	// TODO
 	Destroy(mRoot, 0);
-	//delete mRoot;
 
 }
 
@@ -458,50 +455,37 @@ void BinarySearchTree<Key, Value>::insert(const std::pair<Key, Value>& keyValueP
 {
 	// TODO
 	Node<Key,Value>* nnode = new Node<Key, Value>(keyValuePair.first, keyValuePair.second, NULL);
-
+std::cout  << "wtf" << std::endl;
 	if (mRoot == NULL) {
 		mRoot = nnode;
 	}
-	else {
-		if (nnode->getKey() > mRoot->getKey()) 
-			mRoot->setRight(insertHelp(mRoot, mRoot->getRight(), nnode,keyValuePair));
-		
-		else if (nnode->getKey() < mRoot->getKey())
-			mRoot->setLeft(insertHelp(mRoot, mRoot->getLeft(), nnode,keyValuePair));
 	
-		else {
-			mRoot->setValue(keyValuePair.second);
-			delete nnode;
+	Node<Key, Value>* curr = mRoot;
+	//iteratively looks for where to place new node
+	while (curr) {
+		if (keyValuePair.first > curr->getKey()) {
+			if (curr->getRight() == NULL) {
+				Node<Key,Value>* insnode = new Node<Key, Value>(keyValuePair.first, keyValuePair.second, curr);
+				curr->setRight(insnode);
+				break;
+			}
+			curr = curr->getRight();
+		}
+		else if (keyValuePair.first < curr->getKey()) {
+			if (curr->getLeft() == NULL) {
+				Node<Key,Value>* insnode = new Node<Key, Value>(keyValuePair.first, keyValuePair.second, curr);
+				curr->setLeft(insnode);
+				break;
+			}
+			curr = curr->getLeft();
+		}
+		else if (keyValuePair.first == curr->getKey()){
+			curr->setValue(keyValuePair.second);
+			break;
 		}
 	}
-	
-
 }
 
-template<typename Key, typename Value>
-Node<Key,Value>* BinarySearchTree<Key, Value>::insertHelp(Node<Key, Value>* parent, Node<Key, Value>* root, Node<Key, Value>* insnode, const std::pair<Key, Value>& keyValuePair) {
-	
-	if (root == NULL) {
-		insnode->setParent(parent);
-		return insnode;
-	}
-
-	if (keyValuePair.first > root->getKey()) {
-		root->setRight(insertHelp(root, root->getRight(), insnode, keyValuePair)); 
-	}
-
-	else if (keyValuePair.first < root->getKey()) {
-		root->setLeft(insertHelp(root, root->getLeft(), insnode, keyValuePair)); 
-	}
-
-	else {
-		root->setValue(keyValuePair.second);
-		delete insnode;
-	}
-
-	return root;
-
-}
 
 /**
 * A method to remove all contents of the tree and reset the values in the tree
@@ -548,19 +532,16 @@ Node<Key, Value>* BinarySearchTree<Key, Value>::internalFind(const Key& key) con
 template<typename Key, typename Value>
 Node<Key, Value>* BinarySearchTree<Key, Value>::internalHelper(const Key& key, Node<Key, Value>* curr) const
 {
-	if (curr == NULL)
-		return NULL;
-
-	if (key > curr->getKey()) {
-		return internalHelper(key, curr->getRight());
+	//finds node given its key and a starting position
+	while (curr) {
+		if (key > curr->getKey()) {
+			curr = curr->getRight();
+		}
+		else if (key < curr->getKey()) {
+			curr = curr->getLeft();
+		}
+		else if (key == curr->getKey()) return curr;
 	}
-	else if (key < curr->getKey()) {
-		return internalHelper(key, curr->getLeft());
-	}
-	else if (key == curr->getKey()) {
-		return curr;
-	}
-	
 	return NULL;
 } 
 
@@ -588,54 +569,32 @@ template<typename Key, typename Value>
 Node<Key, Value>* BinarySearchTree<Key, Value>::removehelp(Node<Key, Value>* root, const Key& key)
 {
 	if (root == NULL) {
-		std::cout << "root == NULL" << std::endl; 
 		return root;
 	}
 
-	if (key < root->getKey()) {
-		std::cout << key << " key < root " << root->getKey() << std::endl;
-		root->setLeft(removehelp(root->getLeft(), key));
-	}
-
-	else if (key > root->getKey()) {
-		std::cout << "key > root" << std::endl;
+	if (key > root->getKey()) {//looks for node in right subtree
 		root->setRight(removehelp(root->getRight(), key));
 	}
 
-	else {
-		std::cout << "else" << std::endl;
-		if (root->getRight() == NULL) {
-			std::cout << "no right" << std::endl;
-			Node<Key, Value>* nnode = root->getLeft();
-			delete root;
-			return nnode;
-		}
-		else if (root->getLeft() == NULL) {
-			std::cout << "no left" << std::endl;
+	else if (key < root->getKey()) {//looks for node in left subtree
+		root->setLeft(removehelp(root->getLeft(), key));
+	}
 
+	else { //found node
+		if (root->getLeft() == NULL) {
 			Node<Key, Value>* nnode = root->getRight();
 			delete root;
 			return nnode;
 		}
+		if (root->getRight() == NULL) {
+			Node<Key, Value>* nnode = root->getLeft();
+			delete root;
+			return nnode;
+		}
 
-		std::cout << "found node" << std::endl;
 		Node<Key, Value>* nnode = getMinChild(root->getRight());
 
-		//std::cout << nnode->getLeft() << " " <<  nnode->getLeft() << std::endl;
-		//std::cout << root->getLeft() << " " <<  root->getLeft() << std::endl;
-
-		//std::cout << mRoot << std::endl;
-
 		swap(root, nnode);
-
-		//std::cout << mRoot << std::endl;
-
-
-		//std::cout << nnode->getLeft() << " " <<  nnode->getLeft() << std::endl;
-		//std::cout << root->getLeft() << " " <<  root->getLeft() << std::endl;
-
-
-		std::cout << "call rec on " << nnode->getRight()->getKey() << std::endl;
 
 		nnode->setRight(removehelp(nnode->getRight(), nnode->getKey()));
 		return nnode; 
@@ -651,19 +610,16 @@ void BinarySearchTree<Key, Value>::swap (Node<Key, Value>* onode, Node<Key, Valu
 		return;
 	}
 
-	bool ohasleft = false;
-	bool ohasright = false;
-	bool oisroot = false;
+	//defines some bools to make less cluttered lines
+	bool oisroot = false; 
 	bool oisleft = false;
 	bool oisright = false;
 	
+	//if no parent, is mRoot
 	if (onode->getParent() == NULL)
 		oisroot = true;
-	if (onode->getLeft() != NULL)
-		ohasleft = true;
-	if (onode->getRight() != NULL)
-		ohasright = true;
 
+	//if it has parents, check if it is right or left child
 	if(!oisroot) {
 		if (onode->getParent()->getRight() == onode) 
 			oisright = true;
@@ -671,25 +627,48 @@ void BinarySearchTree<Key, Value>::swap (Node<Key, Value>* onode, Node<Key, Valu
 			oisleft = true;
 	}
 
+	//no successor case
+	if (succ==NULL) {
+		//sets right of parent to  NULL
+		if (oisright) {
+			onode->getParent()->setRight(NULL);
+		}
+
+		//sets left of parent to  NULL
+		if (oisleft) {
+			onode->getParent()->setLeft(NULL);
+		}
+
+		onode->setRight(NULL);
+		onode->setLeft(NULL);
+		onode->setParent(NULL);
+		onode = NULL;
+		return;
+	}
+
+	//removes succ's parent's pointers to it
 	if (succ->getParent()->getRight() == succ)
 		succ->getParent()->setRight(NULL);
 	if (succ->getParent()->getLeft() == succ)
 		succ->getParent()->setLeft(NULL);
 
+	//sets succ's parent to onode's  parent
 	succ->setParent(onode->getParent());
 	succ->setLeft(onode->getLeft());
 	succ->setRight(onode->getRight());
 	
-	if (ohasleft)
+	//sets onode's children's parent to succ 
+	if (onode->getLeft())
 		onode->getLeft()->setParent(succ);
-	if (ohasright)
+	if (onode->getRight())
 		onode->getRight()->setParent(succ);
 	if (oisright)
 		onode->getParent()->setRight(succ);
 	if (oisleft)
 		onode->getParent()->setLeft(succ);
 	if (oisroot)
-		mRoot = succ;
+		this->mRoot = succ;
+
 	delete onode;
 }
 
